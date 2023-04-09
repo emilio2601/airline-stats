@@ -106,3 +106,4 @@ dist
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 /tmp
+.DS_Store
