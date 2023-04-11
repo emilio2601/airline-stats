@@ -25,12 +25,14 @@ class CreateRoutes < ActiveRecord::Migration[7.0]
       t.string :origin, index: true
       t.string :origin_city_name
       t.string :origin_state_abr, index: true
+      t.string :origin_country, index: true
       t.integer :dest_airport_id
       t.integer :dest_airport_seq_id
       t.integer :dest_city_market_id
       t.string :dest, index: true
       t.string :dest_city_name
       t.string :dest_state_abr, index: true
+      t.string :dest_country, index: true
       t.integer :aircraft_group
       t.integer :aircraft_type, index: true
       t.integer :aircraft_config
