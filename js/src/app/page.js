@@ -8,11 +8,11 @@ import aircraftCodes from './aircraft_codes';
 
 export default function Home() {
   const [data, setData] = useState(null);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({order_by: "carrier", order_dir: "asc"});
 
   useEffect(() => {
     axios.get('http://localhost:3210/routes', {params: filters}).then((response) => {
-      setData(Object.entries(response.data));
+      setData(response.data);
       console.log(response.data)
     });
   }, [filters]);
@@ -31,29 +31,49 @@ export default function Home() {
 
       <table className='border-spacing-2 text-center border border-separate border-white'>
         <thead>
-          <th>Airline</th>
-          <th>Aircraft Type</th>
-          <th>Departures scheduled</th>
-          <th>Departures performed</th>
-          <th>Seats</th>
-          <th>Passengers</th>
-          <th>Load Factor</th>
+          <TableHeader filters={filters} setFilters={setFilters} />
         </thead>
         <tbody>
-          {data && data.map((route) => Object.entries(route[1]).map(([ac_type, details]) => (
+          {data && data.map((route) => (
             <tr>
-              <td>{route[0]}</td>
-              <td>{aircraftCodes[ac_type] || ac_type}</td>
-              <td>{formatNumber(details.departures_scheduled)}</td>
-              <td>{formatNumber(details.departures_performed)}</td>
-              <td>{formatNumber(details.seats)}</td>
-              <td>{formatNumber(details.passengers)}</td>
-              <td>{getFormattedLoadFactor(details.passengers, details.seats)}</td>
+              <td>{route.carrier}</td>
+              <td>{aircraftCodes[route.aircraft_type] || aircraft_type}</td>
+              <td>{formatNumber(route.departures_scheduled)} ({formatNumber(route.departures_performed)})</td>
+              <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
+              <td>{formatNumber(route.passengers)} ({formatNumber(Math.round(route.passengers / route.departures_performed))})</td>
+              <td>{getFormattedLoadFactor(route.passengers, route.seats)}</td>
             </tr>
-          )))}
+          ))}
         </tbody>
       </table>
      </main>
+  )
+}
+
+const TableHeader = ( { filters, setFilters }) => {
+  const columnHeaders = [
+    {key: "carrier", value: "Airline"},
+    {key: "aircraft_type", value: "Aircraft Type"},
+    {key: "departures_performed", value: "Departures scheduled (performed)"},
+    {key: "seats", value: "Seats (per flight)"},
+    {key: "passengers", value: "Passengers (per flight)"},
+    {key: "passengers", value: "Load Factor"},
+  ]
+
+  const addSortToFilter = (col) => {
+    setFilters((f) => {return {...f, order_by: col.key, order_dir: f.order_dir == "desc" ? "asc" : "desc", page: 1}})
+  }
+
+  return (
+    <tr>
+      {columnHeaders.map((col, i) => (
+        <th key={i} onClick={() => addSortToFilter(col)} className="cursor-pointer align-text-top">
+          {col.value}
+          {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
+          {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
+        </th>
+      ))}
+    </tr>
   )
 }
 
