@@ -6,6 +6,7 @@ class RoutesController < ApplicationController
     scope = scope.where(origin: params[:origin]) if params[:origin].present?
     scope = scope.where(dest: params[:dest]) if params[:dest].present?
     scope = scope.where(carrier: params[:carrier]) if params[:carrier].present?
+    scope = scope.where(aircraft_type: params[:aircraft_type]) if params[:aircraft_type].present?
 
     dep_schd   = scope.sum(:departures_scheduled)
     dep_prfm   = scope.sum(:departures_performed)

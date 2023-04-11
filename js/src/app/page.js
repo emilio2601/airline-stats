@@ -25,8 +25,8 @@ export default function Home() {
       <div className="flex flex-row space-x-0">
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
-        <BaseFilter name="Aircraft Type" component={(closePopover, setBreakdown, setConfig) => <AirlineFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
-        <BaseFilter name="Date"component={(closePopover, setBreakdown, setConfig) => <AirlineFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AircraftFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <DateFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
       </div>
 
       <table className='border-spacing-2 text-center border border-separate border-white'>
@@ -43,7 +43,7 @@ export default function Home() {
           {data && data.map((route) => Object.entries(route[1]).map(([ac_type, details]) => (
             <tr>
               <td>{route[0]}</td>
-              <td>{aircraftCodes[ac_type]}</td>
+              <td>{aircraftCodes[ac_type] || ac_type}</td>
               <td>{formatNumber(details.departures_scheduled)}</td>
               <td>{formatNumber(details.departures_performed)}</td>
               <td>{formatNumber(details.seats)}</td>
@@ -94,6 +94,46 @@ const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =>
     <>
       <span>Filter by Airline</span>
       <input type="text" placeholder="IATA code" value={airline} onChange={(e) => setAirline(e.target.value)} className="border p-2"/>
+      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
+    </>
+  )
+}
+
+const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const [aircraftType, setAircraftType] = useState('')
+
+  const applyFilter = () => {
+    closePopover()
+    setBreakdown(aircraftType)
+    setFilters((f) => ({ ...f, aircraft_type: aircraftType}))
+  }
+
+  useEffect(() => setConfig({name: "Aircraft Type", keys: ["aircraft_type"]}), [])
+
+  return (
+    <>
+      <span>Filter by Aircraft</span>
+      <input type="text" placeholder="ICAO code" value={aircraftType} onChange={(e) => setAircraftType(e.target.value)} className="border p-2"/>
+      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
+    </>
+  )
+}
+
+const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const [date, setDate] = useState('')
+
+  const applyFilter = () => {
+    closePopover()
+    setBreakdown(date)
+    setFilters((f) => ({ ...f, date: date}))
+  }
+
+  useEffect(() => setConfig({name: "Date", keys: ["date"]}), [])
+
+  return (
+    <>
+      <span>Filter by Date</span>
+      <input type="text" placeholder="YYYY-MM-DD" value={date} onChange={(e) => setDate(e.target.value)} className="border p-2"/>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   )
