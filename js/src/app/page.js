@@ -23,10 +23,12 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center p-24 space-y-4">
       <div className="flex flex-row space-x-0">
-        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
-        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <CountryFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AircraftFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
-        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <DateFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <DateFilter     {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <GroupingFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
       </div>
 
       <table className='border-spacing-2 text-center border border-separate border-white'>
@@ -99,6 +101,28 @@ const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =>
   )
 }
 
+const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const [originCountry, setOriginCountry] = useState('')
+  const [destCountry, setDestCountry] = useState('')
+
+  const applyFilter = () => {
+    closePopover()
+    setBreakdown(`${originCountry} - ${destCountry}`)
+    setFilters((f) => ({...f, origin_country: originCountry, dest_country: destCountry}))
+  }
+
+  useEffect(() => setConfig({name: "Country", keys: ["origin_country", "dest_country"]}), [])
+
+  return (
+    <>
+      <span>Filter by Country</span>
+      <input type="text" placeholder="Origin (ISO alpha-2)" value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className="border p-2"/>
+      <input type="text" placeholder="Destination (ISO alpha-2)" value={destCountry} onChange={(e) => setDestCountry(e.target.value)}  className="border p-2"/>
+      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
+    </>
+  )
+}
+
 const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
   const [airline, setAirline] = useState('')
 
@@ -159,6 +183,24 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
   )
 }
 
+const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const applyFilter = () => {
+    closePopover()
+    setBreakdown(date)
+    setFilters((f) => ({ ...f}))
+  }
+
+  useEffect(() => {setConfig({name: "Group by", keys: ["group_by"]}); setBreakdown("Airline, Aircraft Type")}, [])
+
+  return (
+    <>
+      <span>Group by</span>
+      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
+    </>
+  )
+}
+
+
 const BaseFilter = ({ component, setFilters}) => {
   const [breakdown, setBreakdown] = useState(null)
   const [config, setConfig] = useState({name: "", keys: []})
@@ -185,7 +227,7 @@ const BaseFilter = ({ component, setFilters}) => {
             </div>
             <div>
               <span>{config.name}</span>
-              {breakdown && <span className="mx-2">|</span>}
+              {breakdown && <span className="mx-1.5">|</span>}
               {breakdown && <span className="text-blue-400">{breakdown}</span>}
             </div>
           </div>
