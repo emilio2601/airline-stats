@@ -31,6 +31,7 @@ gem "jbuilder"
 gem "redis", "~> 4.0"
 
 gem "pg"
+gem 'rack-cors'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
@@ -59,6 +60,7 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
   gem 'activerecord-import'
+  gem 'pry-byebug'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"

@@ -1,0 +1,63 @@
+#popover[data-popper-placement^="top"] > #popover-arrow {
+  bottom: -7px;
+}
+#popover[data-popper-placement^="top"] > #popover-arrow::before {
+  border-top-width: 0px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-left-width: 0px;
+  border-color: inherit;
+}
+
+#popover[data-popper-placement^="right"] > #popover-arrow {
+  left: -7px;
+}
+#popover[data-popper-placement^="right"] > #popover-arrow::before {
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-color: inherit;
+}
+
+#popover[data-popper-placement^="bottom"] > #popover-arrow {
+  top: -7px;
+}
+#popover[data-popper-placement^="bottom"] > #popover-arrow::before {
+  border-top-width: 1px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 1px;
+  border-color: inherit;
+}
+
+#popover[data-popper-placement^="left"] > #popover-arrow {
+  right: -7px;
+  
+}
+#popover[data-popper-placement^="left"] > #popover-arrow::before {
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 0px;
+  border-left-width: 0px; 
+  border-color: inherit;
+}
+
+
+#popover-arrow,
+#popover-arrow::before {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+}
+
+#popover-arrow {
+  visibility: hidden;
+}
+
+#popover-arrow::before {
+  visibility: visible;
+  content: "";
+  transform: rotate(45deg);
+}
