@@ -28,6 +28,7 @@ export default function Home() {
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <CountryFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AircraftFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <DateFilter     {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
+        <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <ClassFilter    {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <GroupingFilter {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
       </div>
 
@@ -203,6 +204,26 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   )
+}
+
+const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const [serviceClass, setServiceClass] = useState('')
+
+  const applyFilter = () => {
+    closePopover()
+    setBreakdown(serviceClass)
+    setFilters((f) => ({ ...f, service_class: serviceClass}))
+  }
+
+  useEffect(() => setConfig({name: "Class", keys: ["service_class"]}), [])
+
+  return (
+    <>
+      <span>Filter by Class</span>
+      <input type="text" placeholder="T-100 class" value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2"/>
+      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
+    </>
+  ) 
 }
 
 const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
