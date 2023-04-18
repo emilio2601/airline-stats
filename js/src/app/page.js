@@ -45,8 +45,8 @@ export default function Home() {
               {filters.group_by.includes("dest") && <td>{route.dest}</td>}
               {filters.group_by.includes("origin_country") && <td>{route.origin_country}</td>}
               {filters.group_by.includes("dest_country") && <td>{route.dest_country}</td>}
-              {filters.group_by.includes("month") && <td>{route.month}</td>}
-              {filters.group_by.includes("year") && <td>{route.year}</td>}
+              {filters.group_by.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
+              {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
               <td>{formatNumber(route.departures_scheduled)} ({formatNumber(route.departures_performed)})</td>
               <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
               <td>{formatNumber(route.asms)}</td>
@@ -224,7 +224,7 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
     closePopover()
   }
 
-  useEffect(() => setConfig({name: "Date", keys: ["date"]}), [])
+  useEffect(() => setConfig({name: "Date", keys: ["from_date", "to_date"]}), [])
 
   return (
     <>
