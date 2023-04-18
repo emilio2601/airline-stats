@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import WfPopover from './wf_popover';
 import axios from 'axios';
 
-import aircraftCodes from './aircraft_codes';
+import { aircraftCodes, airlineCodes } from './aircraft_codes';
 
 export default function Home() {
   const [data, setData] = useState(null);
-  const [filters, setFilters] = useState({order_by: "carrier", order_dir: "asc"});
+  const [filters, setFilters] = useState({order_by: "carrier", order_dir: "asc", group_by: ["carrier", "aircraft_type"]});
 
   useEffect(() => {
     axios.get('http://localhost:3210/routes', {params: filters}).then((response) => {
@@ -18,7 +18,7 @@ export default function Home() {
   }, [filters]);
 
   const formatNumber = (number) => Intl.NumberFormat().format(number)
-  const getFormattedLoadFactor = (passengers, seats) => (passengers * 100/seats).toFixed(2) + '%'
+  const getFormattedLoadFactor = (lf) => (lf * 100)?.toFixed(2) + '%'
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24 space-y-4">
@@ -187,12 +187,41 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
 }
 
 const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
-  const [date, setDate] = useState('')
+  const [dropdownChoice, setDropdownChoice] = useState("between")
+
+  const [timePeriod, setTimePeriod] = useState(0)
+  const [timeDropdownChoice, setTimeDropdownChoice] = useState("months")
+  
+  const [firstDate, setFirstDate] = useState(null)
+  const [secondDate, setSecondDate] = useState(null)
 
   const applyFilter = () => {
+    setFilters((f) => {
+      const outFilters = {...f, from_date: null, to_date: null}
+
+      if (dropdownChoice == "between") {
+        outFilters.from_date = firstDate
+        outFilters.to_date = secondDate
+        setBreakdown(`${firstDate} to ${secondDate}`)
+      } else if (dropdownChoice == "equal") {
+        outFilters.from_date = firstDate
+        outFilters.to_date = firstDate
+        setBreakdown(`${firstDate}`)
+      } else if (dropdownChoice == "after") {
+        outFilters.from_date = firstDate
+        setBreakdown(`Starting from ${firstDate}`)
+      } else if (dropdownChoice == "before") {
+        outFilters.to_date = secondDate
+        setBreakdown(`Ending on ${secondDate}`)
+      } else if (dropdownChoice == "last_x") {
+        //outFilters.from_date = dayjs().subtract(timePeriod, timeDropdownChoice).toISOString().split("T")[0]
+        setBreakdown(`Last ${timePeriod == 1 ? "" : timePeriod} ${timePeriod == 1 ? timeDropdownChoice.slice(0, -1) : timeDropdownChoice}`)
+      }
+
+      return outFilters
+    })
+
     closePopover()
-    setBreakdown(date)
-    setFilters((f) => ({ ...f, date: date}))
   }
 
   useEffect(() => setConfig({name: "Date", keys: ["date"]}), [])
@@ -200,7 +229,26 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
   return (
     <>
       <span>Filter by Date</span>
-      <input type="text" placeholder="YYYY-MM-DD" value={date} onChange={(e) => setDate(e.target.value)} className="border p-2"/>
+      <select value={dropdownChoice} onChange={(e) => setDropdownChoice(e.target.value)} className="border p-2">
+        <option value="between">is between</option>
+        <option value="last_x">is in the last</option>
+        <option value="equal">is equal to</option>
+        <option value="after">is on or after</option>
+        <option value="before">is before or on</option>
+      </select>
+      <div className="flex flex-row items-center">
+        <i className="fa fa-share-fa pr-2 pl-1 text-blue-400 -scale-y-100 scale-x-125"></i>
+        {dropdownChoice == "last_x" && <div className="space-x-2">
+          <input type="text" className="border text-sm p-2 w-20" value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)}/>
+          <select value={timeDropdownChoice} onChange={(e) => setTimeDropdownChoice(e.target.value)} className="border p-2 w-28">
+            <option value="months">months</option>
+            <option value="years">years</option>
+          </select>
+        </div>}
+        {["equal", "between", "after"].includes(dropdownChoice) && <input type="date" className="border p-2 text-sm" onChange={(e) => setFirstDate(e.target.value)}/>} 
+        {dropdownChoice == "between" && <span className="px-2">and</span>}
+        {["between", "before"].includes(dropdownChoice) && <input type="date" className="border p-2 text-sm" onChange={(e) => setSecondDate(e.target.value)}/>}        
+      </div>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   )
@@ -227,10 +275,62 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
 }
 
 const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
+  const [byAirline, setByAirline] = useState(true)
+  const [byAircraft, setByAircraft] = useState(true)
+  const [byOriginAirport, setByOriginAirport] = useState(false)
+  const [byDestAirport, setByDestAirport] = useState(false)
+  const [byOriginCountry, setByOriginCountry] = useState(false)
+  const [byDestCountry, setByDestCountry] = useState(false)
+  const [byYear, setByYear] = useState(false)
+  const [byMonth, setByMonth] = useState(false)
+
   const applyFilter = () => {
+    const breakdown = []
+    const groupBy = []
+
+    if (byAirline) {
+      breakdown.push("Airline");
+      groupBy.push("carrier");
+    }
+
+    if (byAircraft) {
+      breakdown.push("Aircraft Type");
+      groupBy.push("aircraft_type");
+    }
+
+    if (byOriginAirport) {
+      breakdown.push("Origin Airport");
+      groupBy.push("origin");
+    }
+
+    if (byDestAirport) {
+      breakdown.push("Destination Airport");
+      groupBy.push("dest");
+    }
+    
+    if (byOriginCountry) {
+      breakdown.push("Origin Country");
+      groupBy.push("origin_country");
+    }
+
+    if (byDestCountry) {
+      breakdown.push("Destination Country");
+      groupBy.push("dest_country");
+    }
+
+    if (byYear) {
+      breakdown.push("Year");
+      groupBy.push("year");
+    }
+
+    if (byMonth) {
+      breakdown.push("Month");
+      groupBy.push("month");
+    }
+
     closePopover()
-    setBreakdown(date)
-    setFilters((f) => ({ ...f}))
+    setBreakdown(breakdown.join(", "))
+    setFilters((f) => ({ ...f, group_by: groupBy}))
   }
 
   useEffect(() => {setConfig({name: "Group by", keys: ["group_by"]}); setBreakdown("Airline, Aircraft Type")}, [])
@@ -238,6 +338,38 @@ const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
   return (
     <>
       <span>Group by</span>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="airline" name="airline" value="airline" checked={byAirline} onChange={(e) => setByAirline(!byAirline)}/>
+        <label for="airline">Airline</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="aircraft_type" name="aircraft_type" value="aircraft_type" checked={byAircraft} onChange={(e) => setByAircraft(!byAircraft)}/>
+        <label for="aircraft_type">Aircraft type</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="origin" name="origin" value="origin" checked={byOriginAirport} onChange={(e) => setByOriginAirport(!byOriginAirport)}/>
+        <label for="origin">Origin airport</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="dest" name="dest" value="dest" checked={byDestAirport} onChange={(e) => setByDestAirport(!byDestAirport)}/>
+        <label for="dest">Destination airport</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="origin_country" name="origin_country" value="origin_country" checked={byOriginCountry} onChange={(e) => setByOriginCountry(!byOriginCountry)}/>
+        <label for="origin_country">Origin country</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="dest_country" name="dest_country" value="dest_country" checked={byDestCountry} onChange={(e) => setByDestCountry(!byDestCountry)}/>
+        <label for="dest_country">Destination country</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="year" name="year" value="year" checked={byYear} onChange={(e) => setByYear(!byYear)}/>
+        <label for="year">Year</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="month" name="month" value="month" checked={byMonth} onChange={(e) => setByMonth(!byMonth)}/>
+        <label for="month">Month</label>
+      </div>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   )
@@ -254,6 +386,9 @@ const BaseFilter = ({ component, setFilters}) => {
     setFilters((f) => {
       const outFilters = {...f}
       config.keys.map((k) => (outFilters[k] = null))
+      if (config.keys.includes("group_by")) {
+        outFilters["group_by"] = []
+      }
       return outFilters
     })
     closePopover()
