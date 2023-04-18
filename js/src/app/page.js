@@ -38,12 +38,20 @@ export default function Home() {
         <tbody>
           {data && data.map((route) => (
             <tr>
-              <td>{route.carrier}</td>
-              <td>{aircraftCodes[route.aircraft_type] || aircraft_type}</td>
+              {filters.group_by.includes("carrier") && <td>{route.carrier}</td>}
+              {filters.group_by.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
+              {filters.group_by.includes("origin") && <td>{route.origin}</td>}
+              {filters.group_by.includes("dest") && <td>{route.dest}</td>}
+              {filters.group_by.includes("origin_country") && <td>{route.origin_country}</td>}
+              {filters.group_by.includes("dest_country") && <td>{route.dest_country}</td>}
+              {filters.group_by.includes("month") && <td>{route.month}</td>}
+              {filters.group_by.includes("year") && <td>{route.year}</td>}
               <td>{formatNumber(route.departures_scheduled)} ({formatNumber(route.departures_performed)})</td>
               <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
+              <td>{formatNumber(route.asms)}</td>
               <td>{formatNumber(route.passengers)} ({formatNumber(Math.round(route.passengers / route.departures_performed))})</td>
-              <td>{getFormattedLoadFactor(route.passengers, route.seats)}</td>
+              <td>{formatNumber(route.rpms)}</td>
+              <td>{getFormattedLoadFactor(route.load_factor)}</td>
             </tr>
           ))}
         </tbody>
@@ -54,12 +62,23 @@ export default function Home() {
 
 const TableHeader = ( { filters, setFilters }) => {
   const columnHeaders = [
-    {key: "carrier", value: "Airline"},
-    {key: "aircraft_type", value: "Aircraft Type"},
     {key: "departures_performed", value: "Departures scheduled (performed)"},
     {key: "seats", value: "Seats (per flight)"},
+    {key: "asms", value: "ASMs"},
     {key: "passengers", value: "Passengers (per flight)"},
-    {key: "passengers", value: "Load Factor"},
+    {key: "rpms", value: "RPMs"},
+    {key: "load_factor", value: "Load Factor"},
+  ]
+
+  const groupingHeaders = [
+    {key: "carrier", value: "Airline"},
+    {key: "aircraft_type", value: "Aircraft Type"},
+    {key: "origin", value: "Origin"},
+    {key: "dest", value: "Destination"},
+    {key: "origin_country", value: "Origin Country"},
+    {key: "dest_country", value: "Destination Country"},
+    {key: "month", value: "Month"},
+    {key: "year", value: "Year"},
   ]
 
   const addSortToFilter = (col) => {
@@ -68,6 +87,9 @@ const TableHeader = ( { filters, setFilters }) => {
 
   return (
     <tr>
+      {groupingHeaders.filter((col) => filters.group_by.includes(col.key)).map((col, i) => (
+        <th key={i}>{col.value}</th>
+      ))}
       {columnHeaders.map((col, i) => (
         <th key={i} onClick={() => addSortToFilter(col)} className="cursor-pointer align-text-top">
           {col.value}
