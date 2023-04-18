@@ -1,7 +1,7 @@
 class RoutesController < ApplicationController
 
   def index
-    mod_params = params[:group_by].map do |group|
+    mod_params = params[:group_by]&.map do |group|
       case group
       when "year"
         "DATE_TRUNC('year', month)"
@@ -91,7 +91,7 @@ class RoutesController < ApplicationController
 
   def group_load_factor(base)
     corrected_load_factor = {}
-    mod_params = params[:group_by].map do |group|
+    mod_params = params[:group_by]&.map do |group|
       case group
       when "year", "month"
         "date_trunc"
