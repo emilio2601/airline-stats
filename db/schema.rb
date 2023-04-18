@@ -50,8 +50,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_09_074143) do
     t.integer "aircraft_group"
     t.integer "aircraft_type"
     t.integer "aircraft_config"
-    t.integer "year"
-    t.integer "month"
+    t.date "month"
+    t.string "service_class"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["aircraft_type"], name: "index_routes_on_aircraft_type"
@@ -70,8 +70,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_09_074143) do
     t.index ["passengers"], name: "index_routes_on_passengers"
     t.index ["payload"], name: "index_routes_on_payload"
     t.index ["seats"], name: "index_routes_on_seats"
+    t.index ["service_class"], name: "index_routes_on_service_class"
     t.index ["unique_carrier"], name: "index_routes_on_unique_carrier"
-    t.index ["year"], name: "index_routes_on_year"
   end
 
 end

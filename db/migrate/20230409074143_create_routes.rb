@@ -36,8 +36,8 @@ class CreateRoutes < ActiveRecord::Migration[7.0]
       t.integer :aircraft_group
       t.integer :aircraft_type, index: true
       t.integer :aircraft_config
-      t.integer :year, index: true
-      t.integer :month, index: true
+      t.date :month, index: true
+      t.string :service_class, index: true
 
       t.timestamps
     end
