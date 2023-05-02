@@ -24,3 +24,4 @@ test:
 production:
   <<: *default
   database: airline_stats_production
+  url: <%= ENV['DATABASE_URL'] %>
