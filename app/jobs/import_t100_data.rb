@@ -1,5 +1,5 @@
 class ImportT100Data
-  require "CSV"
+  require "csv"
 
   DOMESTIC_FILE = "T_T100D_SEGMENT_US_CARRIER_ONLY.csv"
   INTL_FILE = "T_T100I_SEGMENT_ALL_CARRIER.csv"
