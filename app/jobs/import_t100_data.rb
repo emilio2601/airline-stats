@@ -7,7 +7,7 @@ class ImportT100Data
   INTL_COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
   DOMESTIC_COLUMNS = INTL_COLUMNS - ["origin_country", "dest_country"]
 
-  def self.import_domestic(file = DOMESTIC_FILE, batch_size = nil)
+  def self.import_domestic(file = DOMESTIC_FILE, options = {})
     domestic_items = []
     CSV.foreach(file, headers: true) do |row|
       row_data = row.to_h.transform_keys(&:downcase)
@@ -15,11 +15,11 @@ class ImportT100Data
       row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
       domestic_items << row_data
     end
-    res = Route.import(DOMESTIC_COLUMNS, domestic_items, batch_size: batch_size)
+    res = Route.import(DOMESTIC_COLUMNS, domestic_items, options)
     Route.where(id: res.ids).update_all(origin_country: "US", dest_country: "US")
   end
 
-  def self.import_intl(file = INTL_FILE, batch_size = nil)
+  def self.import_intl(file = INTL_FILE, options = {})
     intl_items = []
     CSV.foreach(file, headers: true) do |row|
       row_data = row.to_h.transform_keys(&:downcase)
@@ -41,7 +41,7 @@ class ImportT100Data
 
       intl_items << row_data
     end
-    Route.import(INTL_COLUMNS, intl_items, batch_size: batch_size)
+    Route.import(INTL_COLUMNS, intl_items, options)
   end
 
   def self.import_all
