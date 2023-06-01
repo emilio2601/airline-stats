@@ -10,8 +10,10 @@ export default function Home() {
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState({order_by: "carrier", order_dir: "asc", group_by: ["carrier", "aircraft_type"]});
 
+  const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
+
   useEffect(() => {
-    axios.get('http://localhost:3210/routes', {params: filters}).then((response) => {
+    axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
       setData(response.data);
       console.log(response.data)
     });
