@@ -227,7 +227,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  activerecord-import
+  activerecord-import (~> 1.4.1)
   bootsnap
   capybara
   debug
