@@ -16,7 +16,7 @@ class ImportT100Data
       domestic_items << row_data
     end
     res = Route.import(DOMESTIC_COLUMNS, domestic_items, options)
-    Route.where(id: res.ids).update_all(origin_country: "US", dest_country: "US")
+    Route.where(id: res.ids).in_batches.update_all(origin_country: "US", dest_country: "US")
   end
 
   def self.import_intl(file = INTL_FILE, options = {})
