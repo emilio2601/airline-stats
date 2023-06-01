@@ -8,7 +8,7 @@ import { aircraftCodes, airlineCodes } from './aircraft_codes';
 
 export default function Home() {
   const [data, setData] = useState(null);
-  const [filters, setFilters] = useState({order_by: "carrier", order_dir: "asc", group_by: ["carrier", "aircraft_type"]});
+  const [filters, setFilters] = useState({order_by: "seats", order_dir: "desc", group_by: ["carrier"]});
 
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
 
@@ -335,7 +335,7 @@ const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
     setFilters((f) => ({ ...f, group_by: groupBy}))
   }
 
-  useEffect(() => {setConfig({name: "Group by", keys: ["group_by"]}); setBreakdown("Airline, Aircraft Type")}, [])
+  useEffect(() => {setConfig({name: "Group by", keys: ["group_by"]}); setBreakdown("Airline")}, [])
 
   return (
     <>
