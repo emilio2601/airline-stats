@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24 space-y-4">
-      <div className="flex flex-row space-x-0">
+      <div className="flex flex-row flex-wrap gap-4 justify-center">
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <CountryFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />}/>
