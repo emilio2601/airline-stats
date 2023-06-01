@@ -4,5 +4,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "articles#index"
 
-  resources :routes
+  resources :routes do
+    get "import" => "routes#import", on: :collection
+  end
 end

@@ -1,6 +1,6 @@
 class RoutesController < ApplicationController
   def import
-    return render json: { error: "No URL provided" }, status :bad_request unless params[:url].present?
+    return render json: { error: "No URL provided" }, status: :bad_request unless params[:url].present?
 
     if params[:domestic]
       ImportT100Data.import_domestic(params[:url])
