@@ -23,7 +23,7 @@ export default function Home() {
   const getFormattedLoadFactor = (lf) => (lf * 100)?.toFixed(2) + '%'
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24 space-y-4">
+    <main className="flex min-h-screen flex-col items-center p-12 lg:p-24 space-y-4">
       <div className="flex flex-row flex-wrap gap-4 justify-center">
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
@@ -51,9 +51,9 @@ export default function Home() {
               {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
               <td>{formatNumber(route.departures_scheduled)} ({formatNumber(route.departures_performed)})</td>
               <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
-              <td>{formatNumber(route.asms)}</td>
+              <td className="hidden md:block">{formatNumber(route.asms)}</td>
               <td>{formatNumber(route.passengers)} ({formatNumber(Math.round(route.passengers / route.departures_performed))})</td>
-              <td>{formatNumber(route.rpms)}</td>
+              <td className="hidden md:block">{formatNumber(route.rpms)}</td>
               <td>{getFormattedLoadFactor(route.load_factor)}</td>
             </tr>
           ))}
@@ -67,9 +67,9 @@ const TableHeader = ( { filters, setFilters }) => {
   const columnHeaders = [
     {key: "departures_performed", value: "Departures scheduled (performed)"},
     {key: "seats", value: "Seats (per flight)"},
-    {key: "asms", value: "ASMs"},
+    {key: "asms", value: "ASMs", className: "hidden md:block"},
     {key: "passengers", value: "Passengers (per flight)"},
-    {key: "rpms", value: "RPMs"},
+    {key: "rpms", value: "RPMs", className: "hidden md:block"},
     {key: "load_factor", value: "Load Factor"},
   ]
 
@@ -94,7 +94,7 @@ const TableHeader = ( { filters, setFilters }) => {
         <th key={i}>{col.value}</th>
       ))}
       {columnHeaders.map((col, i) => (
-        <th key={i} onClick={() => addSortToFilter(col)} className="cursor-pointer align-text-top">
+        <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
           {col.value}
           {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
           {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
