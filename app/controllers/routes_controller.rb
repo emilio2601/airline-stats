@@ -1,4 +1,15 @@
 class RoutesController < ApplicationController
+  def import
+    return render json: { error: "No URL provided" }, status :bad_request unless params[:url].present?
+
+    if params[:domestic]
+      ImportT100Data.import_domestic(params[:url])
+    else
+      ImportT100Data.import_intl(params[:url])
+    end
+
+    render json: { success: true }, status: :ok
+  end
 
   def index
     mod_params = params[:group_by]&.map do |group|

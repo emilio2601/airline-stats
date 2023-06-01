@@ -1,15 +1,16 @@
 class ImportT100Data
   require "csv"
+  require "open-uri"
 
-  DOMESTIC_FILE = "T_T100D_SEGMENT_US_CARRIER_ONLY.csv"
+  DOMESTIC_FILE = "T_T100D_SEGMENT_US_CARRIER_ONLY 2023.csv"
   INTL_FILE = "T_T100I_SEGMENT_ALL_CARRIER.csv"
 
   INTL_COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
   DOMESTIC_COLUMNS = INTL_COLUMNS - ["origin_country", "dest_country"]
 
-  def self.import_domestic
+  def self.import_domestic(file = DOMESTIC_FILE)
     domestic_items = []
-    CSV.foreach(DOMESTIC_FILE, headers: true) do |row|
+    CSV.foreach(file, headers: true) do |row|
       row_data = row.to_h.transform_keys(&:downcase)
       row_data["service_class"] = row_data["class"]
       row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
@@ -19,7 +20,7 @@ class ImportT100Data
     Route.where(id: res.ids).update_all(origin_country: "US", dest_country: "US")
   end
 
-  def self.import_intl
+  def self.import_intl(file = INTL_FILE)
     intl_items = []
     CSV.foreach(INTL_FILE, headers: true) do |row|
       row_data = row.to_h.transform_keys(&:downcase)
