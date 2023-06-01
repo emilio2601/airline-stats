@@ -22,7 +22,7 @@ class ImportT100Data
 
   def self.import_intl(file = INTL_FILE)
     intl_items = []
-    CSV.foreach(INTL_FILE, headers: true) do |row|
+    CSV.foreach(file, headers: true) do |row|
       row_data = row.to_h.transform_keys(&:downcase)
 
       if row_data["origin_country"] == "US"
