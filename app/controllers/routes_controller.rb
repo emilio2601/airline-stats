@@ -1,20 +1,4 @@
 class RoutesController < ApplicationController
-  require "open-uri"
-
-  def import
-    return render json: { error: "No URL provided" }, status: :bad_request unless params[:url].present?
-
-    file = URI.open(params[:url])
-
-    if params[:domestic]
-      ImportT100Data.import_domestic(file)
-    else
-      ImportT100Data.import_intl(file)
-    end
-
-    render json: { success: true }, status: :ok
-  end
-
   def index
     mod_params = params[:group_by]&.map do |group|
       case group
