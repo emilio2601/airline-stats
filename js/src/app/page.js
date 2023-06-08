@@ -119,7 +119,11 @@ const TableHeader = ( { filters, setFilters }) => {
   ]
 
   const addSortToFilter = (col) => {
-    setFilters((f) => {return {...f, order_by: col.key, order_dir: f.order_dir == "desc" ? "asc" : "desc", page: 1}})
+    if (filters.order_by == col.key) {
+      setFilters({...filters, order_dir: f.order_dir == "desc" ? "asc" : "desc", page: 1})
+    } else {
+      setFilters({...filters, order_by: col.key, page: 1})
+    }
   }
 
   return (
