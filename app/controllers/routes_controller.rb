@@ -31,6 +31,8 @@ class RoutesController < ApplicationController
     rpms        = scope.sum("passengers * distance")
     load_factor = group_load_factor(scope.select("SUM(passengers)/NULLIF(SUM(seats::float), 0) as load_factor").select(mod_params).order(:load_factor))
 
+    scope = scope.page(params[:page]).per(params[:items_per_page])
+
     base = case params[:order_by]
            when "departures_performed"
             scope.order(sum_departures_performed: params[:order_dir]).sum(:departures_performed)
@@ -43,7 +45,8 @@ class RoutesController < ApplicationController
            when "rpms"
             scope.order(sum_passengers_all_distance: params[:order_dir]).sum("passengers * distance")
            when "load_factor"
-            base_load_factor = scope.order(load_factor: params[:order_dir]).select("SUM(passengers)/NULLIF(SUM(seats::float), 0) as load_factor").select(mod_params)
+            order_clause = params[:order_dir] == "desc" ? "load_factor DESC NULLS LAST" : "load_factor ASC NULLS FIRST"
+            base_load_factor = scope.order(order_clause).select("SUM(passengers)/NULLIF(SUM(seats::float), 0) as load_factor").select(mod_params)
             group_load_factor(base_load_factor)
            else
             passengers
@@ -64,7 +67,7 @@ class RoutesController < ApplicationController
     res = base.map do |row|
       key, data = row
 
-      base = {
+      base_row = {
         departures_scheduled: dep_schd[key],
         departures_performed: dep_prfm[key],
         seats: seats[key],
@@ -75,17 +78,17 @@ class RoutesController < ApplicationController
       }
 
       if params[:group_by].length == 1
-        base[params[:group_by].first] = key
+        base_row[params[:group_by].first] = key
       else
         params[:group_by].each_with_index do |group, idx|
-          base[group] = key[idx]
+          base_row[group] = key[idx]
         end
       end
 
-      base
+      base_row
     end
 
-    render json: res
+    render json: {routes: res, total_items: scope.total_count, total_pages: scope.total_pages}
   end
 
   def group_load_factor(base)

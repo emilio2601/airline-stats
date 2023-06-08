@@ -7,8 +7,8 @@ import axios from 'axios';
 import { aircraftCodes, airlineCodes } from './aircraft_codes';
 
 export default function Home() {
-  const [data, setData] = useState(null);
-  const [filters, setFilters] = useState({order_by: "seats", order_dir: "desc", group_by: ["carrier"]});
+  const [data, setData] = useState({});
+  const [filters, setFilters] = useState({page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"]});
 
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
 
@@ -22,8 +22,20 @@ export default function Home() {
   const formatNumber = (number) => Intl.NumberFormat().format(number)
   const getFormattedLoadFactor = (lf) => (lf * 100)?.toFixed(2) + '%'
 
+  const handleItemsPerPageChange = (e) => {
+    setFilters({...filters, page: 1, items_per_page: e.target.value})
+  }
+
+  const previousPage = () => {
+    setFilters({...filters, page: filters.page - 1})
+  }
+
+  const nextPage = () => {
+    setFilters({...filters, page: filters.page + 1})
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center p-12 lg:p-24 space-y-4">
+    <main className="flex min-h-screen flex-col items-center p-12 lg:p-24 space-y-4 max-w-max mx-auto">
       <div className="flex flex-row flex-wrap gap-4 justify-center">
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirportFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
         <BaseFilter setFilters={setFilters} component={(closePopover, setBreakdown, setConfig) => <AirlineFilter  {...{closePopover, setBreakdown, setFilters, setConfig}} />} />
@@ -39,7 +51,7 @@ export default function Home() {
           <TableHeader filters={filters} setFilters={setFilters} />
         </thead>
         <tbody>
-          {data && data.map((route) => (
+          {data.routes && data.routes.map((route) => (
             <tr>
               {filters.group_by.includes("carrier") && <td>{route.carrier}</td>}
               {filters.group_by.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
@@ -59,8 +71,30 @@ export default function Home() {
           ))}
         </tbody>
       </table>
+      <div className="flex w-full justify-between items-center">
+        <select value={filters.items_per_page} onChange={handleItemsPerPageChange} className="w-36 text-sm m-0 text-white p-2 pr-6 rounded-md border border-gray-300 hover:border-gray-100 bg-transparent cursor-pointer">
+            <option value="20">20 per page</option>
+            <option value="40">40 per page</option>
+            <option value="60">60 per page</option>
+            <option value="80">80 per page</option>
+        </select>
+        <div className="text-center text-sm">
+          <p>Page {filters.page} of {data.total_pages}</p>
+          <p>{data.total_items} total results</p>
+        </div>
+        <div className="space-x-4">
+          <PagingButton disabled={filters.page == 1} onClick={previousPage}>Previous</PagingButton>
+          <PagingButton disabled={filters.page == data.total_pages} onClick={nextPage}>Next</PagingButton>
+        </div>
+      </div>
      </main>
   )
+}
+
+const PagingButton = ({ children, ...props}) => {
+  return <button {...props} className="border border-gray-300 hover:border-gray-100 disabled:border-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md py-2 px-4 uppercase tracking-wider text-gray-300 hover:text-gray-100 text-sm" >
+    {children}
+  </button>
 }
 
 const TableHeader = ( { filters, setFilters }) => {
