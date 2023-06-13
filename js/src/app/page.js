@@ -120,7 +120,7 @@ const TableHeader = ( { filters, setFilters }) => {
 
   const addSortToFilter = (col) => {
     if (filters.order_by == col.key) {
-      setFilters({...filters, order_dir: f.order_dir == "desc" ? "asc" : "desc", page: 1})
+      setFilters({...filters, order_dir: filters.order_dir == "desc" ? "asc" : "desc", page: 1})
     } else {
       setFilters({...filters, order_by: col.key, page: 1})
     }
@@ -129,7 +129,11 @@ const TableHeader = ( { filters, setFilters }) => {
   return (
     <tr>
       {groupingHeaders.filter((col) => filters.group_by.includes(col.key)).map((col, i) => (
-        <th key={i}>{col.value}</th>
+        <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
+          {col.value}
+          {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
+          {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
+        </th>
       ))}
       {columnHeaders.map((col, i) => (
         <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>

@@ -34,6 +34,12 @@ class RoutesController < ApplicationController
     scope = scope.page(params[:page]).per(params[:items_per_page])
 
     base = case params[:order_by]
+           when "carrier"
+            scope.order(carrier: params[:order_dir]).sum(:passengers)
+           when "year"
+            scope.order(date_trunc_year_month: params[:order_dir]).sum(:passengers)
+           when "month"
+            scope.order(date_trunc_month_month: params[:order_dir]).sum(:passengers)
            when "departures_performed"
             scope.order(sum_departures_performed: params[:order_dir]).sum(:departures_performed)
            when "seats"
