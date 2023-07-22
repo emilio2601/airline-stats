@@ -9,7 +9,7 @@ import { aircraftCodes, airlineCodes } from './aircraft_codes';
 
 export default function Home() {
   const [data, setData] = useState({});
-  const [filters, setFilters] = useState({page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"]});
+  const [filters, setFilters] = useState({page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"], origin_country: "US", dest_country: "GB", from_date: "2023-01-01"});
 
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
 
@@ -170,8 +170,8 @@ const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =>
 }
 
 const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
-  const [originCountry, setOriginCountry] = useState('')
-  const [destCountry, setDestCountry] = useState('')
+  const [originCountry, setOriginCountry] = useState("US")
+  const [destCountry, setDestCountry] = useState("GB")
 
   const applyFilter = () => {
     closePopover()
@@ -179,7 +179,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =>
     setFilters((f) => ({...f, origin_country: originCountry, dest_country: destCountry}))
   }
 
-  useEffect(() => setConfig({name: "Country", keys: ["origin_country", "dest_country"]}), [])
+  useEffect(() => {setConfig({name: "Country", keys: ["origin_country", "dest_country"]}); setBreakdown("US - GB")}, [])
 
   return (
     <>
@@ -232,10 +232,10 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
 }
 
 const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
-  const [dropdownChoice, setDropdownChoice] = useState("between")
+  const [dropdownChoice, setDropdownChoice] = useState("last_x")
 
-  const [timePeriod, setTimePeriod] = useState(0)
-  const [timeDropdownChoice, setTimeDropdownChoice] = useState("months")
+  const [timePeriod, setTimePeriod] = useState(1)
+  const [timeDropdownChoice, setTimeDropdownChoice] = useState("years")
   
   const [firstDate, setFirstDate] = useState(null)
   const [secondDate, setSecondDate] = useState(null)
@@ -269,7 +269,7 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
     closePopover()
   }
 
-  useEffect(() => setConfig({name: "Date", keys: ["from_date", "to_date"]}), [])
+  useEffect(() => {setConfig({name: "Date", keys: ["from_date", "to_date"]}); setBreakdown("Starting from 2023-01-01")}, [])
 
   return (
     <>
@@ -321,7 +321,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
 
 const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
   const [byAirline, setByAirline] = useState(true)
-  const [byAircraft, setByAircraft] = useState(true)
+  const [byAircraft, setByAircraft] = useState(false)
   const [byOriginAirport, setByOriginAirport] = useState(false)
   const [byDestAirport, setByDestAirport] = useState(false)
   const [byOriginCountry, setByOriginCountry] = useState(false)
