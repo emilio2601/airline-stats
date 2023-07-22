@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import WfPopover from './wf_popover';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 import { aircraftCodes, airlineCodes } from './aircraft_codes';
 
@@ -258,7 +259,7 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
         outFilters.to_date = secondDate
         setBreakdown(`Ending on ${secondDate}`)
       } else if (dropdownChoice == "last_x") {
-        //outFilters.from_date = dayjs().subtract(timePeriod, timeDropdownChoice).toISOString().split("T")[0]
+        outFilters.from_date = dayjs().subtract(timePeriod, timeDropdownChoice).toISOString().split("T")[0]
         setBreakdown(`Last ${timePeriod == 1 ? "" : timePeriod} ${timePeriod == 1 ? timeDropdownChoice.slice(0, -1) : timeDropdownChoice}`)
       }
 
