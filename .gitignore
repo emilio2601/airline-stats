@@ -107,3 +107,6 @@ dist
 /config/master.key
 /tmp
 .DS_Store
+
+# T-100 files
+*.csv
