@@ -31,17 +31,17 @@ class ImportT100Data
 
         intl_items << row_data
 
-        if options[:csv_batch_size] && intl_items.size > options[:csv_batch_size]
+        if options[:csv_batch_size] && intl_items.size >= options[:csv_batch_size]
           res = Route.import(COLUMNS, intl_items, options)
-          puts "Successfully imported #{res.num_inserts} rows"
           count += res.ids.size
+          puts "Successfully imported #{res.ids.size}/#{count} rows"
           intl_items = []
         end
       end
 
       res = Route.import(COLUMNS, intl_items, options)
       count += res.ids.size
-      puts "Successfully imported #{res.num_inserts}/#{count} rows. Done!"
+      puts "Successfully imported #{res.ids.size}/#{count} rows. Done!"
     end
   end
 
