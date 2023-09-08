@@ -1,52 +1,52 @@
 class ImportT100Data
+  require "open-uri"
   require "csv"
 
-  DOMESTIC_FILE = "T_T100D_SEGMENT_US_CARRIER_ONLY 2023.csv"
-  INTL_FILE = "T_T100I_SEGMENT_ALL_CARRIER.csv"
+  DEFAULT_FILENAME = "T_T100I_SEGMENT_ALL_CARRIER.csv"
 
-  INTL_COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
-  DOMESTIC_COLUMNS = INTL_COLUMNS - ["origin_country", "dest_country"]
+  COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
 
-  def self.import_domestic(file = DOMESTIC_FILE, options = {})
-    domestic_items = []
-    CSV.foreach(file, headers: true) do |row|
-      row_data = row.to_h.transform_keys(&:downcase)
-      row_data["service_class"] = row_data["class"]
-      row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
-      domestic_items << row_data
-    end
-    res = Route.import(DOMESTIC_COLUMNS, domestic_items, options)
-    Route.where(id: res.ids).in_batches.update_all(origin_country: "US", dest_country: "US")
-  end
+  def self.import(file = DEFAULT_FILENAME, options = {})
+    ActiveRecord::Base.transaction do
+      intl_items = []
+      count = 0
+      
+      CSV.foreach(file, headers: true) do |row|
+        row_data = row.to_h.transform_keys(&:downcase)
 
-  def self.import_intl(file = INTL_FILE, options = {})
-    intl_items = []
-    CSV.foreach(file, headers: true) do |row|
-      row_data = row.to_h.transform_keys(&:downcase)
+        if row_data["origin_country"] == "US"
+          row_data["origin_state_abr"] = row_data["origin_city_name"].split(", ").last
+        else
+          row_data["origin_state_abr"] = nil
+        end
 
-      if row_data["origin_country"] == "US"
-        row_data["origin_state_abr"] = row_data["origin_city_name"].split(", ").last
-      else
-        row_data["origin_state_abr"] = nil
+        if row_data["dest_country"] == "US"
+          row_data["dest_state_abr"] = row_data["dest_city_name"].split(", ").last
+        else
+          row_data["dest_state_abr"] = nil
+        end
+
+        row_data["service_class"] = row_data["class"]
+        row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
+
+        intl_items << row_data
+
+        if options[:csv_batch_size] && intl_items.size > options[:csv_batch_size]
+          res = Route.import(INTL_COLUMNS, intl_items, options)
+          puts "Successfully imported #{res.num_inserts} rows"
+          count += res.ids.size
+          intl_items = []
+        end
       end
 
-      if row_data["dest_country"] == "US"
-        row_data["dest_state_abr"] = row_data["dest_city_name"].split(", ").last
-      else
-        row_data["dest_state_abr"] = nil
-      end
-
-      row_data["service_class"] = row_data["class"]
-      row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
-
-      intl_items << row_data
+      res = Route.import(INTL_COLUMNS, intl_items, options)
+      count += res.ids.size
+      puts "Successfully imported #{res.num_inserts}/#{count} rows. Done!"
     end
-    Route.import(INTL_COLUMNS, intl_items, options)
   end
 
-  def self.import_all
-    Route.destroy_all
-    import_domestic
-    import_intl
+  def self.import_from_url(url, options = {})
+    f = URI.open(url)
+    self.import(f, options)
   end
 end
