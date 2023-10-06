@@ -23,12 +23,20 @@ class RoutesController < ApplicationController
     scope = scope.where("month >= ?", params[:from_date]) if params[:from_date].present?
     scope = scope.where("month <= ?", params[:to_date]) if params[:to_date].present?
 
-    dep_schd    = scope.sum(:departures_scheduled)
-    dep_prfm    = scope.sum(:departures_performed)
-    seats       = scope.sum(:seats)
-    passengers  = scope.sum(:passengers)
-    asms        = scope.sum("seats * distance")
-    rpms        = scope.sum("passengers * distance")
+    dep_schd    = scope.async_sum(:departures_scheduled)
+    dep_prfm    = scope.async_sum(:departures_performed)
+    seats       = scope.async_sum(:seats)
+    passengers  = scope.async_sum(:passengers)
+    asms        = scope.async_sum("seats * distance")
+    rpms        = scope.async_sum("passengers * distance")
+
+    dep_schd    = dep_schd.value
+    dep_prfm    = dep_prfm.value
+    seats       = seats.value
+    passengers  = passengers.value
+    asms        = asms.value
+    rpms        = rpms.value
+
     load_factor = group_load_factor(scope.select("SUM(passengers)/NULLIF(SUM(seats::float), 0) as load_factor").select(mod_params).order(:load_factor))
 
     scope = scope.page(params[:page]).per(params[:items_per_page])
