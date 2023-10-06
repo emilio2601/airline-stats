@@ -47,6 +47,7 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 gem "bootsnap", require: false
 
 gem 'activerecord-import', '~> 1.4.1'
+gem "rack", "~> 3.0.0"
 
 # Use Sass to process CSS
 # gem "sassc-rails"
