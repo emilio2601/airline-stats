@@ -6,9 +6,9 @@ class ImportT100Data
 
   COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
 
-  def self.import(file = DEFAULT_FILENAME, options = {})
+  def self.import(file = DEFAULT_FILENAME, **options)
     ActiveRecord::Base.transaction do
-      intl_items = []
+      items = []
       count = 0
       
       CSV.foreach(file, headers: true) do |row|
@@ -29,24 +29,26 @@ class ImportT100Data
         row_data["service_class"] = row_data["class"]
         row_data["month"] = Date.new(row_data["year"].to_i, row_data["month"].to_i)
 
-        intl_items << row_data
+        items << row_data.slice(*COLUMNS)
 
-        if options[:csv_batch_size] && intl_items.size >= options[:csv_batch_size]
-          res = Route.import(COLUMNS, intl_items, options)
-          count += res.ids.size
-          puts "Successfully imported #{res.ids.size}/#{count} rows"
-          intl_items = []
+        if options[:batch_size] && items.size >= options[:batch_size]
+          res = Route.insert_all(items)
+          count += res.rows.count
+          puts "Successfully imported #{res.rows.count}/#{count} rows"
+          items = []
         end
       end
 
-      res = Route.import(COLUMNS, intl_items, options)
-      count += res.ids.size
-      puts "Successfully imported #{res.ids.size}/#{count} rows. Done!"
+      binding.pry
+
+      res = Route.insert_all(items)
+      count += res.rows.count
+      puts "Successfully imported #{res.rows.count}/#{count} rows. Done!"
     end
   end
 
-  def self.import_from_url(url, options = {})
+  def self.import_from_url(url, ...)
     f = URI.open(url)
-    self.import(f, options)
+    self.import(f, ...)
   end
 end
