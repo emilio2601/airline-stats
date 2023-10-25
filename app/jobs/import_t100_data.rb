@@ -39,8 +39,6 @@ class ImportT100Data
         end
       end
 
-      binding.pry
-
       res = Route.insert_all(items)
       count += res.rows.count
       puts "Successfully imported #{res.rows.count}/#{count} rows. Done!"
