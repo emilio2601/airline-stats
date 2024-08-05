@@ -110,3 +110,4 @@ dist
 
 # T-100 files
 *.csv
+/config/credentials/production.key
