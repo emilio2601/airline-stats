@@ -21,6 +21,22 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - POSTGRES_PASSWORD
+
+postgres:
+  image: postgres:16
+  roles:
+    - web
+  env:
+    clear:
+      POSTGRES_USER: "airline_stats_pg"
+      POSTGRES_DB: "airline_stats_production"
+    secret:
+      - POSTGRES_PASSWORD
+  files:
+    - db/structure.sql:/docker-entrypoint-initdb.d/setup.sql
+  directories:
+    - data:/var/lib/postgresql/data
 
 # Use a different ssh user than root
 # ssh:

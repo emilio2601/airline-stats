@@ -24,4 +24,5 @@ test:
 production:
   <<: *default
   database: airline_stats_production
-  url: <%= ENV['DATABASE_URL'] %>
+  username: airline_stats_pg
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
