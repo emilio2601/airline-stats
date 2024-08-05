@@ -6,7 +6,8 @@ image: emilio2601/airline-stats
 
 # Deploy to these servers.
 servers:
-  - io.airlinestats.io
+  web:
+    - io.airlinestats.io
 
 # Credentials for your image host.
 registry:
@@ -20,7 +21,7 @@ registry:
 
 env:
   clear:
-    DB_HOST: localhost
+    DB_HOST: io.airlinestats.io
   secret:
     - RAILS_MASTER_KEY
     - POSTGRES_PASSWORD
@@ -28,8 +29,8 @@ env:
 accessories:
   postgres:
     image: postgres:16
-    roles:
-      - web
+    host: io.airlinestats.io
+    port: 5432
     env:
       clear:
         POSTGRES_USER: "airline_stats_pg"
