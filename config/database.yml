@@ -26,3 +26,4 @@ production:
   database: airline_stats_production
   username: airline_stats_pg
   password: <%= ENV["POSTGRES_PASSWORD"] %>
+  host: <%= ENV["DB_HOST"] %>
