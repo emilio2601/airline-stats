@@ -2,7 +2,7 @@
 service: airline-stats
 
 # Name of the container image.
-image: emilio/airline-stats
+image: emilio2601/airline-stats
 
 # Deploy to these servers.
 servers:
