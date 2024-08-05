@@ -20,7 +20,7 @@ registry:
 
 env:
   clear:
-    DB_HOST: 192.168.0.1
+    DB_HOST: localhost
   secret:
     - RAILS_MASTER_KEY
     - POSTGRES_PASSWORD
@@ -28,8 +28,6 @@ env:
 accessories:
   postgres:
     image: postgres:16
-    host: 192.168.0.1
-    port: 5432
     roles:
       - web
     env:
