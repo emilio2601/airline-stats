@@ -67,7 +67,7 @@ class RoutesController < ApplicationController
            end
 
     if params[:group_by].blank?
-      return render json: [{
+      routes = {
         departures_scheduled: dep_schd,
         departures_performed: dep_prfm,
         seats: seats,
@@ -75,7 +75,9 @@ class RoutesController < ApplicationController
         asms: asms,
         rpms: rpms,
         load_factor: load_factor.values.first
-      }]
+      }
+
+      return render json: {routes: [routes], total_items: 1, total_pages: 1}
     end
 
     res = base.map do |row|

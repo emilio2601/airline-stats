@@ -62,7 +62,7 @@ export default function Home() {
               {filters.group_by.includes("dest_country") && <td>{route.dest_country}</td>}
               {filters.group_by.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
               {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
-              <td>{formatNumber(route.departures_scheduled)} ({formatNumber(route.departures_performed)})</td>
+              <td>{formatNumber(route.departures_performed)}</td>
               <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
               <td className="hidden md:block">{formatNumber(route.asms)}</td>
               <td>{formatNumber(route.passengers)} ({formatNumber(Math.round(route.passengers / route.departures_performed))})</td>
@@ -100,7 +100,7 @@ const PagingButton = ({ children, ...props}) => {
 
 const TableHeader = ( { filters, setFilters }) => {
   const columnHeaders = [
-    {key: "departures_performed", value: "Departures scheduled (performed)"},
+    {key: "departures_performed", value: "Departures performed"},
     {key: "seats", value: "Seats (per flight)"},
     {key: "asms", value: "ASMs", className: "hidden md:block"},
     {key: "passengers", value: "Passengers (per flight)"},
