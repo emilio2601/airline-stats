@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.3.0"
+ruby "3.4.1"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1"
@@ -48,6 +48,8 @@ gem "bootsnap", require: false
 
 gem "rack", "~> 3.0.0"
 
+gem "csv"
+
 # Use Sass to process CSS
 # gem "sassc-rails"
 
@@ -57,6 +59,7 @@ gem "rack", "~> 3.0.0"
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
+  gem "dotenv"
 end
 
 group :development do
@@ -74,7 +77,6 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "selenium-webdriver"
-  gem "webdrivers"
 end
 
 gem "dockerfile-rails", ">= 1.6", :group => :development
