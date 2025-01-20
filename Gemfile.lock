@@ -267,6 +267,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kaminari
+  net-smtp
   pg
   pry-byebug
   puma (~> 6.0)

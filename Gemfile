@@ -50,6 +50,9 @@ gem "rack", "~> 3.0.0"
 
 gem "csv"
 
+# Weird: https://github.com/ruby/net-pop/issues/26
+gem "net-smtp", require: false
+
 # Use Sass to process CSS
 # gem "sassc-rails"
 
