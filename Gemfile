@@ -4,7 +4,10 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "3.4.1"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.1"
+gem 'activerecord', "~> 7.1"
+gem 'activestorage', "~> 7.1"
+gem 'actionpack', "~> 7.1"
+gem 'activejob', "~> 7.1"
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
@@ -81,5 +84,3 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "selenium-webdriver"
 end
-
-gem "dockerfile-rails", ">= 1.6", :group => :development
