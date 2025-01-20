@@ -10,9 +10,17 @@ class ImportT100Data
     ActiveRecord::Base.transaction do
       items = []
       count = 0
+      skipped_count = 0
       
       CSV.foreach(file, headers: true) do |row|
         row_data = row.to_h.transform_keys(&:downcase)
+
+        print(row_data)
+
+        if row_data["origin_city_name"].nil? || row_data["dest_city_name"].nil?
+          skipped_count += 1
+          next
+        end
 
         if row_data["origin_country"] == "US"
           row_data["origin_state_abr"] = row_data["origin_city_name"].split(", ").last
@@ -42,6 +50,7 @@ class ImportT100Data
       res = Route.insert_all(items)
       count += res.rows.count
       puts "Successfully imported #{res.rows.count}/#{count} rows. Done!"
+      puts "Skipped #{skipped_count} rows"
     end
   end
 
