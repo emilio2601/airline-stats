@@ -79,7 +79,7 @@ export default function Home() {
         <tbody>
           {data.routes && data.routes.map((route) => (
             <tr>
-              {filters.group_by.includes("carrier") && <td>{route.carrier}</td>}
+              {filters.group_by.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
               {filters.group_by.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
               {filters.group_by.includes("origin") && <td>{route.origin}</td>}
               {filters.group_by.includes("dest") && <td>{route.dest}</td>}
@@ -98,7 +98,7 @@ export default function Home() {
         </tbody>
       </table>
       <div className="flex w-full justify-between items-center">
-        <select value={filters.items_per_page} onChange={handleItemsPerPageChange} className="w-36 text-sm m-0 text-white p-2 pr-6 rounded-md border border-gray-300 hover:border-gray-100 bg-transparent cursor-pointer">
+        <select value={filters.items_per_page} onChange={handleItemsPerPageChange} className="w-36 text-sm m-0 text-white p-2 pr-6 rounded-md border-r-4 border-transparent outline outline-gray-300 hover:outline-gray-100 bg-transparent cursor-pointer">
             <option value="20">20 per page</option>
             <option value="40">40 per page</option>
             <option value="60">60 per page</option>
@@ -124,26 +124,6 @@ const PagingButton = ({ children, ...props}) => {
 }
 
 const TableHeader = ( { filters, setFilters }) => {
-  const columnHeaders = [
-    {key: "departures_performed", value: "Departures performed"},
-    {key: "seats", value: "Seats (per flight)"},
-    {key: "asms", value: "ASMs", className: "hidden md:block"},
-    {key: "passengers", value: "Passengers (per flight)"},
-    {key: "rpms", value: "RPMs", className: "hidden md:block"},
-    {key: "load_factor", value: "Load Factor"},
-  ]
-
-  const groupingHeaders = [
-    {key: "carrier", value: "Airline"},
-    {key: "aircraft_type", value: "Aircraft Type"},
-    {key: "origin", value: "Origin"},
-    {key: "dest", value: "Destination"},
-    {key: "origin_country", value: "Origin Country"},
-    {key: "dest_country", value: "Destination Country"},
-    {key: "month", value: "Month"},
-    {key: "year", value: "Year"},
-  ]
-
   const addSortToFilter = (col) => {
     if (filters.order_by == col.key) {
       setFilters({...filters, order_dir: filters.order_dir == "desc" ? "asc" : "desc", page: 1})
