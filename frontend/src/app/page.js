@@ -30,6 +30,7 @@ const columnHeaders = [
 
 export default function Home() {
   const [data, setData] = useState({});
+  const [dateRange, setDateRange] = useState({});
   const [filters, setFilters] = useState({page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"], origin_country: "US", dest_country: "GB", from_date: "2023-01-01"});
 
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
@@ -44,6 +45,14 @@ export default function Home() {
       });
     }
   }, [filters]);
+
+  useEffect(async () => {
+    const res = await axios.get(`${baseURL}/routes/date_range`)
+
+    console.log(res.data)
+
+    setDateRange(res.data)
+  }, [])
 
   const formatNumber = (number) => Intl.NumberFormat().format(number)
   const getFormattedLoadFactor = (lf) => (lf * 100)?.toFixed(2) + '%'
@@ -107,6 +116,7 @@ export default function Home() {
         <div className="text-center text-sm">
           <p>Page {filters.page} of {data.total_pages}</p>
           <p>{data.total_items} total results</p>
+          {dateRange.from_date && <p class="text-[10px] mt-2">Data available to query: {dayjs(dateRange.from_date).format("MMM YYYY")} to {dayjs(dateRange.to_date).format("MMM YYYY")}</p>}
         </div>
         <div className="space-x-4">
           <PagingButton disabled={filters.page == 1} onClick={previousPage}>Previous</PagingButton>

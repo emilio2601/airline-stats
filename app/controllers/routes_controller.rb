@@ -107,6 +107,10 @@ class RoutesController < ApplicationController
     render json: {routes: res, total_items: scope.total_count, total_pages: scope.total_pages}
   end
 
+  def date_range
+    render json: {from_date: Route.minimum(:month), to_date: Route.maximum(:month)}
+  end
+
   def group_load_factor(base)
     corrected_load_factor = {}
     mod_params = params[:group_by]&.map do |group|
