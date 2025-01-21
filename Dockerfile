@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
+# Base image for Ruby
 ARG RUBY_VERSION=3.4.1
 FROM ruby:$RUBY_VERSION-slim AS base
 
@@ -17,9 +17,17 @@ ENV BUNDLE_DEPLOYMENT="1" \
 RUN gem update --system --no-document && \
     gem install -N bundler
 
+# Node.js setup for building the Next.js app
+FROM base AS node-setup
+ARG NODE_VERSION=18
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
+    apt-get install --no-install-recommends -y nodejs && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Throw-away build stage to reduce size of final image
-FROM base AS build
+# Throw-away build stage for Rails and Next.js
+FROM node-setup AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
@@ -40,6 +48,15 @@ RUN bundle exec bootsnap precompile app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
+# Build Next.js app
+WORKDIR /rails/frontend
+COPY ./frontend/package.json ./frontend/package-lock.json ./
+RUN npm ci --production
+COPY ./frontend ./
+RUN npm run build
+
+# Move the compiled Next.js files to the Rails public directory
+RUN cp -r /rails/frontend/out/* /rails/public/
 
 # Final stage for app image
 FROM base
@@ -56,7 +73,7 @@ COPY --from=build /rails /rails
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R 1000:1000 db log storage tmp
+    chown -R 1000:1000 db log storage tmp public
 USER 1000:1000
 
 # Entrypoint prepares the database.
