@@ -8,6 +8,26 @@ import dayjs from 'dayjs';
 import { aircraftCodes } from './aircraft_codes';
 import { airlineCodes } from './airline_codes';
 
+const groupingHeaders = [
+  {key: "carrier", value: "Airline"},
+  {key: "aircraft_type", value: "Aircraft Type"},
+  {key: "origin", value: "Origin"},
+  {key: "dest", value: "Destination"},
+  {key: "origin_country", value: "Origin Country"},
+  {key: "dest_country", value: "Destination Country"},
+  {key: "month", value: "Month"},
+  {key: "year", value: "Year"},
+]
+
+const columnHeaders = [
+  {key: "departures_performed", value: "Departures performed"},
+  {key: "seats", value: "Seats (per flight)"},
+  {key: "asms", value: "ASMs", className: "hidden md:block"},
+  {key: "passengers", value: "Passengers (per flight)"},
+  {key: "rpms", value: "RPMs", className: "hidden md:block"},
+  {key: "load_factor", value: "Load Factor"},
+] 
+
 export default function Home() {
   const [data, setData] = useState({});
   const [filters, setFilters] = useState({page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"], origin_country: "US", dest_country: "GB", from_date: "2023-01-01"});
@@ -15,10 +35,14 @@ export default function Home() {
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
 
   useEffect(() => {
-    axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
-      setData(response.data);
-      console.log(response.data)
-    });
+    if (groupingHeaders.map((col) => col.key).includes(filters.order_by) && !filters.group_by.includes(filters.order_by)) {
+      setFilters({...filters, order_by: "seats", order_dir: "desc"})
+    } else {
+      axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
+        setData(response.data);
+        console.log(response.data)
+      });
+    }
   }, [filters]);
 
   const formatNumber = (number) => Intl.NumberFormat().format(number)
