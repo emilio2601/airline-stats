@@ -5,7 +5,8 @@ import WfPopover from './wf_popover';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
-import { aircraftCodes, airlineCodes } from './aircraft_codes';
+import { aircraftCodes } from './aircraft_codes';
+import { airlineCodes } from './airline_codes';
 
 export default function Home() {
   const [data, setData] = useState({});
