@@ -1,5 +1,7 @@
 # airlinestats.io
 
+<img width="1264" alt="image" src="https://github.com/user-attachments/assets/35632155-cc62-471a-81ca-f9e75f3a8cf8" />
+
 ## Overview
 [airlinestats.io](http://airlinestats.io) is a tool that provides insights into airline operations, including:
 - **Which airlines fly where**
