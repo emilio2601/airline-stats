@@ -165,20 +165,33 @@ const TableHeader = ( { filters, setFilters }) => {
 const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) => {
   const [originAirport, setOriginAirport] = useState('')
   const [destAirport, setDestAirport] = useState('')
+  const [isBidirectional, setIsBidirectional] = useState(false)
 
   const applyFilter = () => {
     closePopover()
-    setBreakdown(`${originAirport} - ${destAirport}`)
-    setFilters((f) => ({...f, origin: originAirport, dest: destAirport}))
+    setBreakdown(`${originAirport} ${isBidirectional ? "<->" : "-"} ${destAirport}`)
+    setFilters((f) => ({...f, origin: originAirport, dest: destAirport, bidirectional: isBidirectional}))
   }
 
-  useEffect(() => setConfig({name: "Airport", keys: ["origin", "dest"]}), [])
+  const flipOriginDest = () => {
+    setOriginAirport(destAirport)
+    setDestAirport(originAirport)
+  }
+
+  useEffect(() => setConfig({name: "Airport", keys: ["origin", "dest", "bidirectional"]}), [])
 
   return (
     <>
       <span>Filter by Airport</span>
-      <input type="text" placeholder="Origin" value={originAirport} onChange={(e) => setOriginAirport(e.target.value)} className="border p-2"/>
-      <input type="text" placeholder="Destination" value={destAirport} onChange={(e) => setDestAirport(e.target.value)}  className="border p-2"/>
+      <div className="flex flex-row space-x-2">
+        <input type="text" placeholder="Origin" value={originAirport} onChange={(e) => setOriginAirport(e.target.value)} className="border p-2 w-24"/>
+        <button class="cursor-pointer" onClick={flipOriginDest}>↔️</button>
+        <input type="text" placeholder="Destination" value={destAirport} onChange={(e) => setDestAirport(e.target.value)}  className="border p-2 w-24"/>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="isBidirectional" name="isBidirectional" value="isBidirectional" checked={isBidirectional} onChange={(e) => setIsBidirectional(!isBidirectional)}/>
+        <label for="isBidirectional">Include both directions?</label>
+      </div>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   )

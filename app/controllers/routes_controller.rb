@@ -12,9 +12,18 @@ class RoutesController < ApplicationController
     end
 
     scope = Route.group(mod_params)
-            
-    scope = scope.where(origin: params[:origin]) if params[:origin].present?
-    scope = scope.where(dest: params[:dest]) if params[:dest].present?
+
+    if params[:bidirectional].present? && params[:origin].present? && params[:dest].present?
+      scope = scope.where(origin: params[:dest], dest: params[:origin]).or(Route.where(origin: params[:origin], dest: params[:dest]))
+    elsif params[:bidirectional].present? && params[:origin].present?
+      scope = scope.where(origin: params[:origin]).or(Route.where(dest: params[:origin]))
+    elsif params[:bidirectional].present? && params[:dest].present?
+      scope = scope.where(dest: params[:dest]).or(Route.where(origin: params[:dest]))
+    else
+      scope = scope.where(origin: params[:origin]) if params[:origin].present?
+      scope = scope.where(dest: params[:dest]) if params[:dest].present?
+    end
+
     scope = scope.where(carrier: params[:carrier]) if params[:carrier].present?
     scope = scope.where(aircraft_type: params[:aircraft_type]) if params[:aircraft_type].present?
     scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
