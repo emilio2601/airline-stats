@@ -194,7 +194,9 @@ const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =>
       <span>Filter by Airport</span>
       <div className="flex flex-row space-x-2">
         <input type="text" placeholder="Origin" value={originAirport} onChange={(e) => setOriginAirport(e.target.value)} className="border p-2 w-24"/>
-        <button class="cursor-pointer" onClick={flipOriginDest}>↔️</button>
+        <button class="cursor-pointer" onClick={flipOriginDest}>
+          <i className="fa-solid fa-right-left"></i>
+        </button>
         <input type="text" placeholder="Destination" value={destAirport} onChange={(e) => setDestAirport(e.target.value)}  className="border p-2 w-24"/>
       </div>
       <div className="flex flex-row space-x-2">
