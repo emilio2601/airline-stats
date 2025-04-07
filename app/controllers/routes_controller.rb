@@ -13,11 +13,13 @@ class RoutesController < ApplicationController
 
     scope = Route.group(mod_params)
 
-    if params[:bidirectional].present? && params[:origin].present? && params[:dest].present?
+    bidirectional = ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional])
+
+    if bidirectional && params[:origin].present? && params[:dest].present?
       scope = scope.where(origin: params[:dest], dest: params[:origin]).or(Route.where(origin: params[:origin], dest: params[:dest]))
-    elsif params[:bidirectional].present? && params[:origin].present?
+    elsif bidirectional && params[:origin].present?
       scope = scope.where(origin: params[:origin]).or(Route.where(dest: params[:origin]))
-    elsif params[:bidirectional].present? && params[:dest].present?
+    elsif bidirectional && params[:dest].present?
       scope = scope.where(dest: params[:dest]).or(Route.where(origin: params[:dest]))
     else
       scope = scope.where(origin: params[:origin]) if params[:origin].present?
