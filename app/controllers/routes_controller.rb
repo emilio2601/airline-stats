@@ -4,6 +4,8 @@ class RoutesController < ApplicationController
       case group
       when "year"
         "DATE_TRUNC('year', month)"
+      when "quarter"
+        "DATE_TRUNC('quarter', month)"
       when "month"
         "DATE_TRUNC('month', month)"
       else
@@ -57,6 +59,8 @@ class RoutesController < ApplicationController
             scope.order(carrier: params[:order_dir]).sum(:passengers)
            when "year"
             scope.order(date_trunc_year_month: params[:order_dir]).sum(:passengers)
+            when "quarter"
+            scope.order(date_trunc_quarter_month: params[:order_dir]).sum(:passengers)
            when "month"
             scope.order(date_trunc_month_month: params[:order_dir]).sum(:passengers)
            when "departures_performed"

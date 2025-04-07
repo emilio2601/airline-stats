@@ -16,6 +16,7 @@ const groupingHeaders = [
   {key: "origin_country", value: "Origin Country"},
   {key: "dest_country", value: "Destination Country"},
   {key: "month", value: "Month"},
+  {key: "quarter", value: "Quarter"},
   {key: "year", value: "Year"},
 ]
 
@@ -26,7 +27,14 @@ const columnHeaders = [
   {key: "passengers", value: "Passengers (per flight)"},
   {key: "rpms", value: "RPMs", className: "hidden md:block"},
   {key: "load_factor", value: "Load Factor"},
-] 
+]
+
+const quarterMap = {
+  "01": "Q1",
+  "04": "Q2",
+  "07": "Q3",
+  "10": "Q4"
+}
 
 export default function Home() {
   const [data, setData] = useState({});
@@ -95,6 +103,7 @@ export default function Home() {
               {filters.group_by.includes("origin_country") && <td>{route.origin_country}</td>}
               {filters.group_by.includes("dest_country") && <td>{route.dest_country}</td>}
               {filters.group_by.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
+              {filters.group_by.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
               {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
               <td>{formatNumber(route.departures_performed)}</td>
               <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
@@ -355,6 +364,7 @@ const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
   const [byOriginCountry, setByOriginCountry] = useState(false)
   const [byDestCountry, setByDestCountry] = useState(false)
   const [byYear, setByYear] = useState(false)
+  const [byQuarter, setByQuarter] = useState(false)
   const [byMonth, setByMonth] = useState(false)
 
   const applyFilter = () => {
@@ -394,6 +404,11 @@ const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
     if (byYear) {
       breakdown.push("Year");
       groupBy.push("year");
+    }
+
+    if (byQuarter) {
+      breakdown.push("Quarter");
+      groupBy.push("quarter");
     }
 
     if (byMonth) {
@@ -438,6 +453,10 @@ const GroupingFilter = ({ closePopover, setBreakdown, setFilters, setConfig }) =
       <div className="flex flex-row space-x-2">
         <input type="checkbox" id="year" name="year" value="year" checked={byYear} onChange={(e) => setByYear(!byYear)}/>
         <label for="year">Year</label>
+      </div>
+      <div className="flex flex-row space-x-2">
+        <input type="checkbox" id="quarter" name="quarter" value="quarter" checked={byQuarter} onChange={(e) => setByQuarter(!byQuarter)}/>
+        <label for="quarter">Quarter</label>
       </div>
       <div className="flex flex-row space-x-2">
         <input type="checkbox" id="month" name="month" value="month" checked={byMonth} onChange={(e) => setByMonth(!byMonth)}/>
