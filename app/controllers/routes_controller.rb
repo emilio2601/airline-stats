@@ -130,7 +130,7 @@ class RoutesController < ApplicationController
     corrected_load_factor = {}
     mod_params = params[:group_by]&.map do |group|
       case group
-      when "year", "month"
+      when "year", "quarter", "month"
         "date_trunc"
       else
         group
