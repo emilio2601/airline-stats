@@ -51,7 +51,7 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Build Next.js app
 WORKDIR /rails/frontend
 COPY ./frontend/package.json ./frontend/package-lock.json ./
-RUN npm ci --production
+RUN npm ci --omit=dev
 COPY ./frontend ./
 RUN npm run build
 
