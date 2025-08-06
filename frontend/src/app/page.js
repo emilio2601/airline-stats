@@ -131,6 +131,7 @@ export default function Home({ initialFilters, savedSearch }) {
           <p>Page {filters.page} of {data.total_pages}</p>
           <p>{data.total_items} total results</p>
           {dateRange.from_date && <p class="text-[10px] mt-2">Data available to query: {dayjs(dateRange.from_date).format("MMM YYYY")} to {dayjs(dateRange.to_date).format("MMM YYYY")}</p>}
+          <p class="text-[10px]">Contact <a href="mailto:info@airlinestats.io" className="text-blue-500">info@airlinestats.io</a> for any questions or feedback</p>
         </div>
         <div className="space-x-4">
           <PagingButton disabled={filters.page == 1} onClick={previousPage}>Previous</PagingButton>
