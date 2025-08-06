@@ -4,6 +4,6 @@ class RoutesController < ApplicationController
   end
 
   def date_range
-    render json: {from_date: Route.minimum(:month), to_date: Route.maximum(:month)}
+    render json: {from_date: RouteSummary.minimum(:month), to_date: RouteSummary.maximum(:month)}
   end
 end
