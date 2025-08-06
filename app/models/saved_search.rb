@@ -23,6 +23,9 @@ class SavedSearch < ApplicationRecord
   private
 
   def generate_shareable_id
-    self.shareable_id = SecureRandom.urlsafe_base64(8)
+    loop do
+      self.shareable_id = SecureRandom.alphanumeric(10)
+      break unless SavedSearch.exists?(shareable_id: self.shareable_id)
+    end
   end
 end
