@@ -10,5 +10,5 @@ Rails.application.routes.draw do
     get :date_range, on: :collection
   end
 
-  resources :saved_searches, only: [:create, :show]
+  resources :saved_searches, only: [:create, :show, :index, :destroy]
 end

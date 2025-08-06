@@ -127,7 +127,8 @@ CREATE TABLE public.saved_searches (
     params jsonb NOT NULL,
     shareable_id character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    session_id character varying
 );
 
 
@@ -269,6 +270,13 @@ CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING b
 
 
 --
+-- Name: index_saved_searches_on_session_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_saved_searches_on_session_id ON public.saved_searches USING btree (session_id);
+
+
+--
 -- Name: index_saved_searches_on_shareable_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -282,6 +290,7 @@ CREATE UNIQUE INDEX index_saved_searches_on_shareable_id ON public.saved_searche
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250807034137'),
 ('20250807034136'),
 ('20250807034135'),
 ('20250807034134'),

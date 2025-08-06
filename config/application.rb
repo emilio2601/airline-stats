@@ -39,5 +39,12 @@ module AirlineStats
     config.active_record.async_query_executor = :global_thread_pool
     config.active_record.global_executor_concurrency = 8
     config.active_record.schema_format = :sql
+
+    # Skip views, helpers and assets when generating a new resource.
+    config.api_only = true
+
+    # Middleware for session management
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore, key: '_airline_stats_session'
   end
 end
