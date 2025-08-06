@@ -6,6 +6,10 @@ class ImportT100Data
 
   COLUMNS = Route.columns.map(&:name) - ["id", "created_at", "updated_at"]
 
+  def self.format_number(number)
+    number.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+  end
+
   def self.setup_s3_client
     @s3_client ||= Aws::S3::Client.new(
       access_key_id: ENV['CLOUDFLARE_R2_ACCESS_KEY_ID'],
@@ -53,7 +57,7 @@ class ImportT100Data
   def self.get_existing_date_ranges
     # Get all unique year-month combinations already in the database
     existing = Route.distinct.pluck(:month).compact.map { |date| date.beginning_of_month }.to_set
-    puts "📊 Found #{existing.size} months of data already imported"
+    puts "📊 Found #{format_number(existing.size)} months of data already imported"
     existing
   end
 
@@ -109,8 +113,8 @@ class ImportT100Data
     
     puts "\n" + "=" * 60
     puts "🎉 IMPORT COMPLETE!"
-    puts "   Total imported: #{total_imported} rows"
-    puts "   Total skipped: #{total_skipped} rows"
+    puts "   Total imported: #{format_number(total_imported)} rows"
+    puts "   Total skipped: #{format_number(total_skipped)} rows"
     puts "=" * 60
   end
 
@@ -163,7 +167,7 @@ class ImportT100Data
     batch_size = options[:batch_size] || 10_000
     skip_existing_months = options.fetch(:skip_existing_months, true)
     
-    puts "📊 Starting import with batch size: #{batch_size}"
+    puts "📊 Starting import with batch size: #{format_number(batch_size)}"
     puts "🔄 Month handling: #{skip_existing_months ? 'Skip existing months' : 'Allow duplicate months'}"
     
     ActiveRecord::Base.transaction do
@@ -180,7 +184,7 @@ class ImportT100Data
         Set.new
       end
       
-      puts "📋 Found #{existing_months.size} months already imported" if skip_existing_months
+      puts "📋 Found #{format_number(existing_months.size)} months already imported" if skip_existing_months
       puts "📖 Reading CSV file..."
       
       months_in_file = Set.new
@@ -230,7 +234,7 @@ class ImportT100Data
           begin
             result = Route.insert_all(items)
             imported_count += result.rows.count
-            puts "   📈 Batch #{(line_num / batch_size) + 1}: +#{result.rows.count} rows (total: #{imported_count})"
+            puts "   📈 Batch #{(line_num / batch_size) + 1}: +#{format_number(result.rows.count)} rows (total: #{format_number(imported_count)})"
             items = []
           rescue => e
             puts "   ❌ Error in batch: #{e.message}"
@@ -245,17 +249,17 @@ class ImportT100Data
         begin
           result = Route.insert_all(items)
           imported_count += result.rows.count
-          puts "   📈 Final batch: +#{result.rows.count} rows (total: #{imported_count})"
+          puts "   📈 Final batch: +#{format_number(result.rows.count)} rows (total: #{format_number(imported_count)})"
         rescue => e
           puts "   ❌ Error in final batch: #{e.message}"
         end
       end
 
       puts "   📊 Import summary:"
-      puts "      Imported: #{imported_count} rows"
-      puts "      Skipped (missing data): #{skipped_count} rows"
-      puts "      Skipped (existing months): #{month_skipped_count} rows" if skip_existing_months
-      puts "      New months processed: #{months_in_file.size}" if months_in_file.any?
+      puts "      Imported: #{format_number(imported_count)} rows"
+      puts "      Skipped (missing data): #{format_number(skipped_count)} rows"
+      puts "      Skipped (existing months): #{format_number(month_skipped_count)} rows" if skip_existing_months
+      puts "      New months processed: #{format_number(months_in_file.size)}" if months_in_file.any?
       
       [imported_count, skipped_count + month_skipped_count]
     end
