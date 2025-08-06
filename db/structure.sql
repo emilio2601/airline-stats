@@ -165,10 +165,45 @@ CREATE INDEX idx_route_summaries_carrier_month ON public.route_summaries USING b
 
 
 --
+-- Name: idx_route_summaries_carrier_no_month; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_carrier_no_month ON public.route_summaries USING btree (carrier);
+
+
+--
 -- Name: idx_route_summaries_countries_month; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_route_summaries_countries_month ON public.route_summaries USING btree (origin_country, dest_country, month);
+
+
+--
+-- Name: idx_route_summaries_countries_no_month; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_countries_no_month ON public.route_summaries USING btree (origin_country, dest_country);
+
+
+--
+-- Name: idx_route_summaries_dest_country_month; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_dest_country_month ON public.route_summaries USING btree (dest_country, origin_country, month);
+
+
+--
+-- Name: idx_route_summaries_dest_country_no_month; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_dest_country_no_month ON public.route_summaries USING btree (dest_country, origin_country);
+
+
+--
+-- Name: idx_route_summaries_dest_origin_month; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_dest_origin_month ON public.route_summaries USING btree (dest, origin, month);
 
 
 --
@@ -192,6 +227,7 @@ CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING b
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250807034135'),
 ('20250807034134'),
 ('20250807034133'),
 ('20250807034132'),
