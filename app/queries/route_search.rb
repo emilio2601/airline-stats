@@ -1,0 +1,140 @@
+class RouteSearch
+  include Pagy::Backend
+
+  # Whitelists for security
+  GROUPABLE_COLUMNS = %w[carrier aircraft_type origin dest origin_country dest_country year quarter month].freeze
+  ORDERABLE_COLUMNS = %w[
+    carrier aircraft_type origin dest origin_country dest_country year quarter month
+    departures_scheduled departures_performed seats passengers asms rpms load_factor
+  ].freeze
+  ORDER_DIRECTIONS  = %w[asc desc].freeze
+
+  def initialize(params)
+    @params = params
+  end
+
+  def call
+    scope = base_scope
+      .select(select_clause)
+      .group(group_expressions)
+      .order(Arel.sql(order_clause))
+
+    pagy, routes = pagy(scope, items: params[:items_per_page] || 20)
+
+    {
+      routes: routes,
+      total_items: pagy.count,
+      total_pages: pagy.pages
+    }
+  end
+
+  private
+
+  attr_reader :params
+
+  def base_scope
+    scope = RouteSummary.all
+
+    if bidirectional? && params[:origin].present? && params[:dest].present?
+      scope = scope.where(origin: params[:dest], dest: params[:origin]).or(RouteSummary.where(origin: params[:origin], dest: params[:dest]))
+    elsif bidirectional? && params[:origin].present?
+      scope = scope.where(origin: params[:origin]).or(RouteSummary.where(dest: params[:origin]))
+    elsif bidirectional? && params[:dest].present?
+      scope = scope.where(dest: params[:dest]).or(RouteSummary.where(origin: params[:dest]))
+    else
+      scope = scope.where(origin: params[:origin]) if params[:origin].present?
+      scope = scope.where(dest: params[:dest]) if params[:dest].present?
+    end
+    
+    scope = scope.where(carrier: params[:carrier]) if params[:carrier].present?
+    scope = scope.where(aircraft_type: params[:aircraft_type]) if params[:aircraft_type].present?
+    scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
+    scope = scope.where(dest_country: params[:dest_country]) if params[:dest_country].present?
+    scope = scope.where(service_class: params[:service_class]) if params[:service_class].present?
+    scope = scope.where("month >= ?", params[:from_date]) if params[:from_date].present?
+    scope = scope.where("month <= ?", params[:to_date]) if params[:to_date].present?
+
+    scope
+  end
+
+  def select_clause
+    select_statements = [
+      "SUM(departures_scheduled) AS departures_scheduled",
+      "SUM(departures_performed) AS departures_performed",
+      "SUM(seats) AS seats",
+      "SUM(passengers) AS passengers",
+      "SUM(asms) AS asms",
+      "SUM(rpms) AS rpms",
+      "SUM(passengers) / NULLIF(SUM(seats::float), 0) AS load_factor"
+    ]
+
+    (group_aliases + select_statements).join(", ")
+  end
+
+  def group_expressions
+    sanitized_group_by.map do |group|
+      case group
+      when "year" then "DATE_TRUNC('year', month)"
+      when "quarter" then "DATE_TRUNC('quarter', month)"
+      when "month" then "DATE_TRUNC('month', month)"
+      else group
+      end
+    end
+  end
+
+  def group_aliases
+    sanitized_group_by.map do |group|
+      case group
+      when "year" then "DATE_TRUNC('year', month) as year"
+      when "quarter" then "DATE_TRUNC('quarter', month) as quarter"
+      when "month" then "DATE_TRUNC('month', month) as month"
+      else group
+      end
+    end
+  end
+
+  def order_clause
+    order_by = sanitized_order_by
+    order_dir = sanitized_order_dir
+
+    aggregated_columns = [
+      "departures_scheduled", "departures_performed", "seats",
+      "passengers", "asms", "rpms"
+    ]
+
+    if ["year", "quarter", "month"].include?(order_by)
+      # This is a grouping column based on a date truncation
+      "DATE_TRUNC('#{order_by}', month) #{order_dir}"
+    elsif aggregated_columns.include?(order_by)
+      # This is an aggregated column, so we must order by the aggregation
+      "SUM(#{order_by}) #{order_dir}"
+    elsif order_by == "load_factor"
+      # Special case for the calculated load_factor
+      "(SUM(passengers) / NULLIF(SUM(seats::float), 0)) #{order_dir} NULLS LAST"
+    else
+      # This must be a regular grouping column (e.g., carrier)
+      "#{order_by} #{order_dir}"
+    end
+  end
+
+  def bidirectional?
+    ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional])
+  end
+
+  # --- Sanitization Methods ---
+
+  def sanitized_group_by
+    return [] if params[:group_by].blank?
+    Array.wrap(params[:group_by]).select { |g| GROUPABLE_COLUMNS.include?(g) }
+  end
+
+  def sanitized_order_by
+    return "passengers" unless ORDERABLE_COLUMNS.include?(params[:order_by])
+    params[:order_by]
+  end
+
+  def sanitized_order_dir
+    return "desc" unless ORDER_DIRECTIONS.include?(params[:order_dir]&.downcase)
+    params[:order_dir]
+  end
+end 

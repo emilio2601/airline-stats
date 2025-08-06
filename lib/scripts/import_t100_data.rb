@@ -116,6 +116,9 @@ class ImportT100Data
     puts "   Total imported: #{format_number(total_imported)} rows"
     puts "   Total skipped: #{format_number(total_skipped)} rows"
     puts "=" * 60
+
+    Scenic.database.refresh_materialized_view(:route_summaries, concurrently: true)
+    puts "🔄 Refreshed materialized view"
   end
 
   def self.import_single_file_from_s3(s3_client, bucket_name, file_key, **options)

@@ -75,6 +75,30 @@ CREATE TABLE public.routes (
 
 
 --
+-- Name: route_summaries; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.route_summaries AS
+ SELECT (date_trunc('month'::text, (month)::timestamp with time zone))::date AS month,
+    carrier,
+    origin,
+    dest,
+    origin_country,
+    dest_country,
+    aircraft_type,
+    service_class,
+    sum(departures_scheduled) AS departures_scheduled,
+    sum(departures_performed) AS departures_performed,
+    sum(seats) AS seats,
+    sum(passengers) AS passengers,
+    sum((seats * distance)) AS asms,
+    sum((passengers * distance)) AS rpms
+   FROM public.routes
+  GROUP BY (date_trunc('month'::text, (month)::timestamp with time zone)), carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class
+  WITH NO DATA;
+
+
+--
 -- Name: routes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -134,129 +158,31 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: index_routes_on_aircraft_type; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_route_summaries_carrier_month; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_routes_on_aircraft_type ON public.routes USING btree (aircraft_type);
-
-
---
--- Name: index_routes_on_departures_performed; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_departures_performed ON public.routes USING btree (departures_performed);
+CREATE INDEX idx_route_summaries_carrier_month ON public.route_summaries USING btree (carrier, month);
 
 
 --
--- Name: index_routes_on_departures_scheduled; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_route_summaries_countries_month; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_routes_on_departures_scheduled ON public.routes USING btree (departures_scheduled);
-
-
---
--- Name: index_routes_on_dest; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_dest ON public.routes USING btree (dest);
+CREATE INDEX idx_route_summaries_countries_month ON public.route_summaries USING btree (origin_country, dest_country, month);
 
 
 --
--- Name: index_routes_on_dest_country; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_route_summaries_origin_dest_month; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_routes_on_dest_country ON public.routes USING btree (dest_country);
-
-
---
--- Name: index_routes_on_dest_state_abr; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_dest_state_abr ON public.routes USING btree (dest_state_abr);
+CREATE INDEX idx_route_summaries_origin_dest_month ON public.route_summaries USING btree (origin, dest, month);
 
 
 --
--- Name: index_routes_on_distance; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_route_summaries_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_routes_on_distance ON public.routes USING btree (distance);
-
-
---
--- Name: index_routes_on_freight; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_freight ON public.routes USING btree (freight);
-
-
---
--- Name: index_routes_on_mail; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_mail ON public.routes USING btree (mail);
-
-
---
--- Name: index_routes_on_month; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_month ON public.routes USING btree (month);
-
-
---
--- Name: index_routes_on_origin; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_origin ON public.routes USING btree (origin);
-
-
---
--- Name: index_routes_on_origin_country; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_origin_country ON public.routes USING btree (origin_country);
-
-
---
--- Name: index_routes_on_origin_state_abr; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_origin_state_abr ON public.routes USING btree (origin_state_abr);
-
-
---
--- Name: index_routes_on_passengers; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_passengers ON public.routes USING btree (passengers);
-
-
---
--- Name: index_routes_on_payload; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_payload ON public.routes USING btree (payload);
-
-
---
--- Name: index_routes_on_seats; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_seats ON public.routes USING btree (seats);
-
-
---
--- Name: index_routes_on_service_class; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_service_class ON public.routes USING btree (service_class);
-
-
---
--- Name: index_routes_on_unique_carrier; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_routes_on_unique_carrier ON public.routes USING btree (unique_carrier);
+CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING btree (month, carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class);
 
 
 --
@@ -266,5 +192,8 @@ CREATE INDEX index_routes_on_unique_carrier ON public.routes USING btree (unique
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250807034131'),
+('20250807032332'),
+('20250806182501'),
 ('20230409074143');
 

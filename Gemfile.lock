@@ -45,6 +45,9 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
+    annotaterb (4.18.0)
+      activerecord (>= 6.0.0)
+      activesupport (>= 6.0.0)
     aws-eventstream (1.4.0)
     aws-partitions (1.1142.0)
     aws-sdk-core (3.229.0)
@@ -127,6 +130,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.2-arm64-darwin)
       racc (~> 1.4)
+    pagy (6.5.0)
     pg (1.5.9)
     pry (0.15.2)
       coderay (~> 1.1)
@@ -174,6 +178,9 @@ GEM
     rexml (3.4.0)
     ruby-progressbar (1.13.0)
     rubyzip (2.4.1)
+    scenic (1.9.0)
+      activerecord (>= 4.0.0)
+      railties (>= 4.0.0)
     securerandom (0.4.1)
     selenium-webdriver (4.27.0)
       base64 (~> 0.2)
@@ -219,6 +226,7 @@ DEPENDENCIES
   activejob (~> 8.0)
   activerecord (~> 8.0)
   activestorage (~> 8.0)
+  annotaterb
   aws-sdk-s3
   bootsnap
   csv
@@ -227,6 +235,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kaminari
+  pagy (~> 6.0)
   pg
   pry-byebug
   puma (~> 6.0)
@@ -235,6 +244,7 @@ DEPENDENCIES
   redis (~> 4.0)
   ruby-progressbar
   rubyzip
+  scenic (~> 1.7)
   selenium-webdriver
   sprockets-rails
   sqlite3 (~> 1.4)
