@@ -1,0 +1,26 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: saved_searches
+#
+#  id           :bigint           not null, primary key
+#  params       :jsonb            not null
+#  search_name  :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  shareable_id :string           not null
+#
+# Indexes
+#
+#  index_saved_searches_on_shareable_id  (shareable_id) UNIQUE
+#
+one:
+  search_name: MyString
+  params: 
+  shareable_id: MyString
+
+two:
+  search_name: MyString
+  params: 
+  shareable_id: MyString

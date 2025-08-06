@@ -6,7 +6,9 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  resources :routes do
-    get "date_range", on: :collection
+  resources :routes, only: [:index] do
+    get :date_range, on: :collection
   end
+
+  resources :saved_searches, only: [:create, :show]
 end
