@@ -192,6 +192,9 @@ CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING b
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250807034134'),
+('20250807034133'),
+('20250807034132'),
 ('20250807034131'),
 ('20250807032332'),
 ('20250806182501'),
