@@ -57,8 +57,6 @@ gem "rubyzip"
 gem "aws-sdk-s3" 
 gem "ruby-progressbar"
 
-# Weird: https://github.com/ruby/net-pop/issues/26
-gem "net-smtp", require: false
 
 # Use Sass to process CSS
 # gem "sassc-rails"
