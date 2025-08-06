@@ -1,13 +1,13 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.4.1"
+ruby "3.4.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'activerecord', "~> 7.1"
-gem 'activestorage', "~> 7.1"
-gem 'actionpack', "~> 7.1"
-gem 'activejob', "~> 7.1"
+gem 'activerecord', "~> 8.0"
+gem 'activestorage', "~> 8.0"
+gem 'actionpack', "~> 8.0"
+gem 'activejob', "~> 8.0"
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
@@ -49,7 +49,7 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-gem "rack", "~> 3.0.0"
+gem "rack"
 
 gem "csv"
 

@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Base image for Ruby
-ARG RUBY_VERSION=3.4.1
+ARG RUBY_VERSION=3.4.5
 FROM ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -19,7 +19,7 @@ RUN gem update --system --no-document && \
 
 # Node.js setup for building the Next.js app
 FROM base AS node-setup
-ARG NODE_VERSION=18
+ARG NODE_VERSION=22
 RUN apt-get update && \
     apt-get install --no-install-recommends -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
