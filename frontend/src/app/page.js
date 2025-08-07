@@ -6,18 +6,17 @@ import dayjs from 'dayjs';
 
 import { aircraftCodes } from './aircraft_codes';
 import { airlineCodes } from './airline_codes';
+import useLocalStorage from './hooks/useLocalStorage';
 import PagingButton from './components/PagingButton';
 import TableHeader from './components/TableHeader';
 import AirportFilter from './components/filters/AirportFilter';
 import CountryFilter from './components/filters/CountryFilter';
-import AirlineFilter from './components/filters/AirlineFilter';
-import AircraftFilter from './components/filters/AircraftFilter';
 import DateFilter from './components/filters/DateFilter';
-import ClassFilter from './components/filters/ClassFilter';
-import GroupingFilter from './components/filters/GroupingFilter';
 import BaseFilter from './components/BaseFilter';
 import SaveSearchButton from './components/SaveSearchButton';
 import MySearchesButton from './components/MySearchesButton';
+import ViewSettings from './components/ViewSettings';
+import MoreFilters from './components/MoreFilters';
 
 const quarterMap = {
   "01": "Q1",
@@ -38,6 +37,15 @@ const groupingHeaders = [
   {key: "year", value: "Year"},
 ]
 
+const columnHeaders = [
+  {key: "departures_performed", value: "Departures performed"},
+  {key: "seats", value: "Seats (per flight)"},
+  {key: "asms", value: "ASMs", className: "hidden md:block"},
+  {key: "passengers", value: "Passengers (per flight)"},
+  {key: "rpms", value: "RPMs", className: "hidden md:block"},
+  {key: "load_factor", value: "Load Factor"},
+]
+
 export default function Home({ initialFilters, savedSearch }) {
   const isInitialMount = useRef(true);
 
@@ -47,6 +55,17 @@ export default function Home({ initialFilters, savedSearch }) {
   const [dateRange, setDateRange] = useState({});
   const [filters, setFilters] = useState(initialFilters || defaultFilters);
   const [isSavedSearchView, setIsSavedSearchView] = useState(!!savedSearch);
+  
+  const [visibleColumns, setVisibleColumns] = useLocalStorage(
+    'visibleColumns',
+    columnHeaders.reduce((acc, col) => ({ ...acc, [col.key]: true }), {})
+  );
+
+  const [formattingOptions, setFormattingOptions] = useLocalStorage('formattingOptions', {
+    showPerFlightAverage: true,
+    rounding: 'none',
+    decimalPrecision: 0,
+  });
 
   const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
 
@@ -80,8 +99,35 @@ export default function Home({ initialFilters, savedSearch }) {
     fetchDateRange();
   }, [])
 
-  const formatNumber = (number) => Intl.NumberFormat().format(number)
-  const getFormattedLoadFactor = (lf) => (lf * 100)?.toFixed(2) + '%'
+  const formatNumber = (number) => {
+    const precision = formattingOptions.decimalPrecision;
+    const numberFormatOptions = {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    };
+
+    if (formattingOptions.rounding === 'B' && number >= 1_000_000_000) {
+      const value = number / 1_000_000_000;
+      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'B';
+    }
+    if (formattingOptions.rounding === 'M' && number >= 1_000_000) {
+      const value = number / 1_000_000;
+      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'M';
+    }
+    if (formattingOptions.rounding === 'K' && number >= 1_000) {
+      const value = number / 1_000;
+      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'K';
+    }
+    return Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(number);
+  };
+
+  const getFormattedLoadFactor = (lf) => {
+    const value = lf * 100;
+    return Intl.NumberFormat(undefined, {
+      minimumFractionDigits: formattingOptions.decimalPrecision,
+      maximumFractionDigits: formattingOptions.decimalPrecision,
+    }).format(value) + '%';
+  }
 
   const handleItemsPerPageChange = (e) => {
     setFilters({...filters, page: 1, items_per_page: e.target.value})
@@ -105,19 +151,24 @@ export default function Home({ initialFilters, savedSearch }) {
       )}
       <div className="flex flex-row flex-wrap gap-4 justify-center">
         <BaseFilter setFilters={setFilters} filters={filters} component={AirportFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={AirlineFilter} />
         <BaseFilter setFilters={setFilters} filters={filters} component={CountryFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={AircraftFilter} />
         <BaseFilter setFilters={setFilters} filters={filters} component={DateFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={ClassFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={GroupingFilter} />
+        <MoreFilters filters={filters} setFilters={setFilters} />
+        <ViewSettings 
+          filters={filters} 
+          setFilters={setFilters} 
+          visibleColumns={visibleColumns} 
+          setVisibleColumns={setVisibleColumns} 
+          formattingOptions={formattingOptions}
+          setFormattingOptions={setFormattingOptions}
+        />
         <SaveSearchButton filters={filters} />
         <MySearchesButton />
       </div>
 
       <table className='border-spacing-2 text-center border border-separate border-white'>
         <thead>
-          <TableHeader filters={filters} setFilters={setFilters} />
+          <TableHeader filters={filters} setFilters={setFilters} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
         </thead>
         <tbody>
           {data.routes && data.routes.map((route) => (
@@ -131,12 +182,12 @@ export default function Home({ initialFilters, savedSearch }) {
               {filters.group_by.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
               {filters.group_by.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
               {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
-              <td>{formatNumber(route.departures_performed)}</td>
-              <td>{formatNumber(route.seats)} ({formatNumber(Math.round(route.seats / route.departures_performed))})</td>
-              <td className="hidden md:block">{formatNumber(route.asms)}</td>
-              <td>{formatNumber(route.passengers)} ({formatNumber(Math.round(route.passengers / route.departures_performed))})</td>
-              <td className="hidden md:block">{formatNumber(route.rpms)}</td>
-              <td>{getFormattedLoadFactor(route.load_factor)}</td>
+              {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
+              {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.seats / route.departures_performed))})`}</td>}
+              {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
+              {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.passengers / route.departures_performed))})`}</td>}
+              {visibleColumns.rpms && <td className="hidden md:block">{formatNumber(route.rpms)}</td>}
+              {visibleColumns.load_factor && <td>{getFormattedLoadFactor(route.load_factor)}</td>}
             </tr>
           ))}
         </tbody>

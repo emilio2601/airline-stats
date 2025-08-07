@@ -24,10 +24,10 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters
         setBreakdown(`${firstDate}`)
       } else if (dropdownChoice == "after") {
         outFilters.from_date = firstDate
-        setBreakdown(`Starting from ${firstDate}`)
+        setBreakdown(`From ${firstDate}`)
       } else if (dropdownChoice == "before") {
         outFilters.to_date = secondDate
-        setBreakdown(`Ending on ${secondDate}`)
+        setBreakdown(`To ${secondDate}`)
       } else if (dropdownChoice == "last_x") {
         outFilters.from_date = dayjs().subtract(timePeriod, timeDropdownChoice).toISOString().split("T")[0]
         setBreakdown(`Last ${timePeriod == 1 ? "" : timePeriod} ${timePeriod == 1 ? timeDropdownChoice.slice(0, -1) : timeDropdownChoice}`)
@@ -47,9 +47,9 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters
     } else if (filters.from_date && filters.to_date) {
       setBreakdown(`${filters.from_date} to ${filters.to_date}`)
     } else if (filters.from_date) {
-      setBreakdown(`Starting from ${filters.from_date}`)
+      setBreakdown(`From ${filters.from_date}`)
     } else if (filters.to_date) {
-      setBreakdown(`Ending on ${filters.to_date}`)
+      setBreakdown(`To ${filters.to_date}`)
     } else {
       setBreakdown(null)
     }

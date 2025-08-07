@@ -21,7 +21,7 @@ const columnHeaders = [
   {key: "load_factor", value: "Load Factor"},
 ]
 
-const TableHeader = ( { filters, setFilters }) => {
+const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }) => {
   const addSortToFilter = (col) => {
     if (filters.order_by == col.key) {
       setFilters({...filters, order_dir: filters.order_dir == "desc" ? "asc" : "desc", page: 1})
@@ -39,13 +39,19 @@ const TableHeader = ( { filters, setFilters }) => {
           {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
         </th>
       ))}
-      {columnHeaders.map((col, i) => (
-        <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
-          {col.value}
-          {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
-          {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
-        </th>
-      ))}
+      {columnHeaders.filter(col => visibleColumns[col.key]).map((col, i) => {
+        let { value } = col;
+        if (!formattingOptions.showPerFlightAverage) {
+          value = value.replace(" (per flight)", "");
+        }
+        return (
+          <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
+            {value}
+            {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
+            {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
+          </th>
+        )
+      })}
     </tr>
   )
 }
