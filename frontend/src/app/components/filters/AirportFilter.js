@@ -17,11 +17,27 @@ const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   useEffect(() => {
     setConfig({name: "Airport", keys: ["origin", "dest", "bidirectional_airport"]})
-    if (filters.origin || filters.dest) {
-      setBreakdown(`${filters.origin || ''} ${filters.bidirectional_airport ? "<->" : "-"} ${filters.dest || ''}`)
+    
+    let breakdownText = null;
+    if (filters.bidirectional_airport) {
+      if (filters.origin && filters.dest) {
+        breakdownText = `${filters.origin} <-> ${filters.dest}`;
+      } else if (filters.origin) {
+        breakdownText = `To/From ${filters.origin}`;
+      } else if (filters.dest) {
+        breakdownText = `To/From ${filters.dest}`;
+      }
     } else {
-      setBreakdown(null)
+      if (filters.origin && filters.dest) {
+        breakdownText = `${filters.origin} - ${filters.dest}`;
+      } else if (filters.origin) {
+        breakdownText = `From ${filters.origin}`;
+      } else if (filters.dest) {
+        breakdownText = `To ${filters.dest}`;
+      }
     }
+    setBreakdown(breakdownText);
+
   }, [filters.origin, filters.dest, filters.bidirectional_airport, setConfig, setBreakdown])
 
   return (

@@ -17,11 +17,27 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   useEffect(() => {
     setConfig({name: "Country", keys: ["origin_country", "dest_country", "bidirectional_country"]})
-    if (filters.origin_country || filters.dest_country) {
-      setBreakdown(`${filters.origin_country || ''} ${filters.bidirectional_country ? "<->" : "-"} ${filters.dest_country || ''}`)
+    
+    let breakdownText = null;
+    if (filters.bidirectional_country) {
+      if (filters.origin_country && filters.dest_country) {
+        breakdownText = `${filters.origin_country} <-> ${filters.dest_country}`;
+      } else if (filters.origin_country) {
+        breakdownText = `To/From ${filters.origin_country}`;
+      } else if (filters.dest_country) {
+        breakdownText = `To/From ${filters.dest_country}`;
+      }
     } else {
-      setBreakdown(null)
+      if (filters.origin_country && filters.dest_country) {
+        breakdownText = `${filters.origin_country} - ${filters.dest_country}`;
+      } else if (filters.origin_country) {
+        breakdownText = `From ${filters.origin_country}`;
+      } else if (filters.dest_country) {
+        breakdownText = `To ${filters.dest_country}`;
+      }
     }
+    setBreakdown(breakdownText);
+
   }, [filters.origin_country, filters.dest_country, filters.bidirectional_country, setConfig, setBreakdown])
 
   return (
