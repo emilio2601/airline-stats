@@ -1,18 +1,8 @@
 import { useState, useEffect } from 'react';
 
 function useLocalStorage(key, initialValue) {
-  const [storedValue, setStoredValue] = useState(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.log(error);
-      return initialValue;
-    }
-  });
+  // Always initialize state with the default value on both server and client
+  const [storedValue, setStoredValue] = useState(initialValue);
 
   const setValue = (value) => {
     try {
@@ -27,12 +17,15 @@ function useLocalStorage(key, initialValue) {
     }
   };
 
+  // This effect runs only on the client, after the initial render.
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    try {
       const item = window.localStorage.getItem(key);
       if (item) {
         setStoredValue(JSON.parse(item));
       }
+    } catch (error) {
+      console.log(error);
     }
   }, [key]);
 
