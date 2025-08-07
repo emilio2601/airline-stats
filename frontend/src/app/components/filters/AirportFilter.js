@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters }) => {
   const [originAirport, setOriginAirport] = useState(filters.origin || '')
   const [destAirport, setDestAirport] = useState(filters.dest || '')
-  const [isBidirectional, setIsBidirectional] = useState(filters.bidirectional || false)
+  const [isBidirectional, setIsBidirectional] = useState(filters.bidirectional_airport || false)
 
   const applyFilter = () => {
     closePopover()
-    setFilters((f) => ({...f, origin: originAirport, dest: destAirport, bidirectional: isBidirectional}))
+    setFilters((f) => ({...f, origin: originAirport, dest: destAirport, bidirectional_airport: isBidirectional}))
   }
 
   const flipOriginDest = () => {
@@ -16,13 +16,13 @@ const AirportFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
   }
 
   useEffect(() => {
-    setConfig({name: "Airport", keys: ["origin", "dest", "bidirectional"]})
+    setConfig({name: "Airport", keys: ["origin", "dest", "bidirectional_airport"]})
     if (filters.origin || filters.dest) {
-      setBreakdown(`${filters.origin || ''} ${filters.bidirectional ? "<->" : "-"} ${filters.dest || ''}`)
+      setBreakdown(`${filters.origin || ''} ${filters.bidirectional_airport ? "<->" : "-"} ${filters.dest || ''}`)
     } else {
       setBreakdown(null)
     }
-  }, [filters.origin, filters.dest, filters.bidirectional, setConfig, setBreakdown])
+  }, [filters.origin, filters.dest, filters.bidirectional_airport, setConfig, setBreakdown])
 
   return (
     <>
