@@ -35,21 +35,30 @@ class RouteSearch
   def base_scope
     scope = RouteSummary.all
 
-    if bidirectional? && params[:origin].present? && params[:dest].present?
+    if bidirectional_airport? && params[:origin].present? && params[:dest].present?
       scope = scope.where(origin: params[:dest], dest: params[:origin]).or(RouteSummary.where(origin: params[:origin], dest: params[:dest]))
-    elsif bidirectional? && params[:origin].present?
+    elsif bidirectional_airport? && params[:origin].present?
       scope = scope.where(origin: params[:origin]).or(RouteSummary.where(dest: params[:origin]))
-    elsif bidirectional? && params[:dest].present?
+    elsif bidirectional_airport? && params[:dest].present?
       scope = scope.where(dest: params[:dest]).or(RouteSummary.where(origin: params[:dest]))
     else
       scope = scope.where(origin: params[:origin]) if params[:origin].present?
       scope = scope.where(dest: params[:dest]) if params[:dest].present?
     end
     
+    if bidirectional_country? && params[:origin_country].present? && params[:dest_country].present?
+      scope = scope.where(origin_country: params[:dest_country], dest_country: params[:origin_country]).or(RouteSummary.where(origin_country: params[:origin_country], dest_country: params[:dest_country]))
+    elsif bidirectional_country? && params[:origin_country].present?
+      scope = scope.where(origin_country: params[:origin_country]).or(RouteSummary.where(dest_country: params[:origin_country]))
+    elsif bidirectional_country? && params[:dest_country].present?
+      scope = scope.where(dest_country: params[:dest_country]).or(RouteSummary.where(origin_country: params[:dest_country]))
+    else
+      scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
+      scope = scope.where(dest_country: params[:dest_country]) if params[:dest_country].present?
+    end
+
     scope = scope.where(carrier: params[:carrier]) if params[:carrier].present?
     scope = scope.where(aircraft_type: params[:aircraft_type]) if params[:aircraft_type].present?
-    scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
-    scope = scope.where(dest_country: params[:dest_country]) if params[:dest_country].present?
     scope = scope.where(service_class: params[:service_class]) if params[:service_class].present?
     scope = scope.where("month >= ?", params[:from_date]) if params[:from_date].present?
     scope = scope.where("month <= ?", params[:to_date]) if params[:to_date].present?
@@ -117,8 +126,12 @@ class RouteSearch
     end
   end
 
-  def bidirectional?
-    ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional])
+  def bidirectional_airport?
+    ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional_airport])
+  end
+
+  def bidirectional_country?
+    ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional_country])
   end
 
   # --- Sanitization Methods ---
@@ -129,12 +142,10 @@ class RouteSearch
   end
 
   def sanitized_order_by
-    return "passengers" unless ORDERABLE_COLUMNS.include?(params[:order_by])
-    params[:order_by]
+    ORDERABLE_COLUMNS.include?(params[:order_by]) ? params[:order_by] : "seats"
   end
 
   def sanitized_order_dir
-    return "desc" unless ORDER_DIRECTIONS.include?(params[:order_dir]&.downcase)
-    params[:order_dir]
+    ORDER_DIRECTIONS.include?(params[:order_dir]&.downcase) ? params[:order_dir] : "desc"
   end
 end 
