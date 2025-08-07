@@ -32,7 +32,7 @@ const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }
 
   return (
     <tr>
-      {groupingHeaders.filter((col) => filters.group_by.includes(col.key)).map((col, i) => (
+      {groupingHeaders.filter((col) => filters.group_by?.includes(col.key)).map((col, i) => (
         <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
           {col.value}
           {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}

@@ -48,15 +48,15 @@ RUN bundle exec bootsnap precompile app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# Build Next.js app
+# Build the Vite app
 WORKDIR /rails/frontend
 COPY ./frontend/package.json ./frontend/package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm install
 COPY ./frontend ./
 RUN npm run build
 
-# Move the compiled Next.js files to the Rails public directory
-RUN cp -r /rails/frontend/out/* /rails/public/
+# Move the compiled Vite files to the Rails public directory
+RUN cp -r /rails/frontend/dist/* /rails/public/
 
 # Final stage for app image
 FROM base

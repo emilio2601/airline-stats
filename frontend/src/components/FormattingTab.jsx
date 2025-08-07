@@ -32,6 +32,7 @@ const FormattingTab = ({ formattingOptions, setFormattingOptions }) => {
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
         >
           <option value="none">None</option>
+          <option value="auto">Automatic (K/M/B)</option>
           <option value="K">Thousands (K)</option>
           <option value="M">Millions (M)</option>
           <option value="B">Billions (B)</option>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WfPopover from '../wf_popover';
+import WfPopover from './wf_popover';
 
 const BaseFilter = ({ component: Component, setFilters, filters, dark }) => {
   const [breakdown, setBreakdown] = useState(null)

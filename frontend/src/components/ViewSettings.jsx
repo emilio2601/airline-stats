@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WfPopover from '../wf_popover';
+import WfPopover from './wf_popover';
 import GroupingTab from './GroupingTab';
 import ColumnsTab from './ColumnsTab';
 import FormattingTab from './FormattingTab';

@@ -1,5 +1,5 @@
-import React from 'react';
-import WfPopover from '../wf_popover';
+import React, { useState } from 'react';
+import WfPopover from './wf_popover';
 import BaseFilter from './BaseFilter';
 import AirlineFilter from './filters/AirlineFilter';
 import AircraftFilter from './filters/AircraftFilter';

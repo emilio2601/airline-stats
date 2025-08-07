@@ -1,21 +1,19 @@
-'use client';
-
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
-import { aircraftCodes } from './aircraft_codes';
-import { airlineCodes } from './airline_codes';
-import useLocalStorage from './hooks/useLocalStorage';
-import PagingButton from './components/PagingButton';
-import TableHeader from './components/TableHeader';
-import AirportFilter from './components/filters/AirportFilter';
-import CountryFilter from './components/filters/CountryFilter';
-import DateFilter from './components/filters/DateFilter';
-import BaseFilter from './components/BaseFilter';
-import SavedSearches from './components/SavedSearches';
-import ViewSettings from './components/ViewSettings';
-import MoreFilters from './components/MoreFilters';
+import { aircraftCodes } from '../data/aircraft_codes';
+import { airlineCodes } from '../data/airline_codes';
+import useLocalStorage from '../hooks/useLocalStorage';
+import PagingButton from '../components/PagingButton';
+import TableHeader from '../components/TableHeader';
+import AirportFilter from '../components/filters/AirportFilter';
+import CountryFilter from '../components/filters/CountryFilter';
+import DateFilter from '../components/filters/DateFilter';
+import BaseFilter from '../components/BaseFilter';
+import SavedSearches from '../components/SavedSearches';
+import ViewSettings from '../components/ViewSettings';
+import MoreFilters from '../components/MoreFilters';
 
 const quarterMap = {
   "01": "Q1",
@@ -45,9 +43,7 @@ const columnHeaders = [
   {key: "load_factor", value: "Load Factor"},
 ]
 
-export default function Home({ initialFilters, savedSearch }) {
-  const isInitialMount = useRef(true);
-
+export default function HomePage({ initialFilters, savedSearch }) {
   const defaultFilters = {page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"], origin_country: "US", dest_country: "GB", from_date: "2023-01-01"};
 
   const [data, setData] = useState({});
@@ -66,28 +62,32 @@ export default function Home({ initialFilters, savedSearch }) {
     decimalPrecision: 0,
   });
 
-  const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : ""
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+  const handleFilterChange = (newFilters) => {
+    // This is a data-consistency guard. It ensures that if we are sorting by a
+    // column, that column must be part of the 'group by' clause. If it's not,
+    // we reset the sort to a default value to prevent an invalid API request.
+    const resolvedFilters = typeof newFilters === 'function' ? newFilters(filters) : newFilters;
+    
+    let correctedFilters = { ...resolvedFilters };
+    if (groupingHeaders.map((col) => col.key).includes(correctedFilters.order_by) && !correctedFilters.group_by?.includes(correctedFilters.order_by)) {
+      correctedFilters = { ...correctedFilters, order_by: "seats", order_dir: "desc" };
     }
-
+    
+    // If we were viewing a saved search, this indicates the user is now modifying it.
     if (isSavedSearchView) {
       setIsSavedSearchView(false);
-      window.history.pushState({}, '', '/');
     }
-  }, [filters]);
 
+    setFilters(correctedFilters);
+  };
+
+  const baseURL = "/api";
+
+  // This is the single source of truth for fetching data when filters change.
   useEffect(() => {
-    if (groupingHeaders.map((col) => col.key).includes(filters.order_by) && !filters.group_by.includes(filters.order_by)) {
-      setFilters({...filters, order_by: "seats", order_dir: "desc"})
-    } else {
-      axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
-        setData(response.data);
-      });
-    }
+    axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
+      setData(response.data);
+    });
   }, [filters]);
 
   useEffect(() => {
@@ -105,6 +105,11 @@ export default function Home({ initialFilters, savedSearch }) {
       maximumFractionDigits: precision,
     };
 
+    if (formattingOptions.rounding === 'auto') {
+        if (number >= 1_000_000_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000_000_000) + 'B';
+        if (number >= 1_000_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000_000) + 'M';
+        if (number >= 1_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000) + 'K';
+    }
     if (formattingOptions.rounding === 'B' && number >= 1_000_000_000) {
       const value = number / 1_000_000_000;
       return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'B';
@@ -129,15 +134,15 @@ export default function Home({ initialFilters, savedSearch }) {
   }
 
   const handleItemsPerPageChange = (e) => {
-    setFilters({...filters, page: 1, items_per_page: e.target.value})
+    handleFilterChange({...filters, page: 1, items_per_page: e.target.value})
   }
 
   const previousPage = () => {
-    setFilters({...filters, page: filters.page - 1})
+    handleFilterChange({...filters, page: filters.page - 1})
   }
 
   const nextPage = () => {
-    setFilters({...filters, page: filters.page + 1})
+    handleFilterChange({...filters, page: filters.page + 1})
   }
 
   return (
@@ -149,13 +154,13 @@ export default function Home({ initialFilters, savedSearch }) {
         </div>
       )}
       <div className="flex flex-row flex-wrap gap-4 justify-center">
-        <BaseFilter setFilters={setFilters} filters={filters} component={AirportFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={CountryFilter} />
-        <BaseFilter setFilters={setFilters} filters={filters} component={DateFilter} />
-        <MoreFilters filters={filters} setFilters={setFilters} />
+        <BaseFilter setFilters={handleFilterChange} filters={filters} component={AirportFilter} />
+        <BaseFilter setFilters={handleFilterChange} filters={filters} component={CountryFilter} />
+        <BaseFilter setFilters={handleFilterChange} filters={filters} component={DateFilter} />
+        <MoreFilters filters={filters} setFilters={handleFilterChange} />
         <ViewSettings 
           filters={filters} 
-          setFilters={setFilters} 
+          setFilters={handleFilterChange} 
           visibleColumns={visibleColumns} 
           setVisibleColumns={setVisibleColumns} 
           formattingOptions={formattingOptions}
@@ -166,20 +171,20 @@ export default function Home({ initialFilters, savedSearch }) {
 
       <table className='border-spacing-2 text-center border border-separate border-white'>
         <thead>
-          <TableHeader filters={filters} setFilters={setFilters} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
+          <TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
         </thead>
         <tbody>
           {data.routes && data.routes.map((route) => (
             <tr key={route.id}>
-              {filters.group_by.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
-              {filters.group_by.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
-              {filters.group_by.includes("origin") && <td>{route.origin}</td>}
-              {filters.group_by.includes("dest") && <td>{route.dest}</td>}
-              {filters.group_by.includes("origin_country") && <td>{route.origin_country}</td>}
-              {filters.group_by.includes("dest_country") && <td>{route.dest_country}</td>}
-              {filters.group_by.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
-              {filters.group_by.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
-              {filters.group_by.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
+              {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
+              {filters.group_by?.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
+              {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
+              {filters.group_by?.includes("dest") && <td>{route.dest}</td>}
+              {filters.group_by?.includes("origin_country") && <td>{route.origin_country}</td>}
+              {filters.group_by?.includes("dest_country") && <td>{route.dest_country}</td>}
+              {filters.group_by?.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
+              {filters.group_by?.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
+              {filters.group_by?.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
               {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
               {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.seats / route.departures_performed))})`}</td>}
               {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
@@ -210,4 +215,4 @@ export default function Home({ initialFilters, savedSearch }) {
       </div>
      </main>
   )
-}
+} 
