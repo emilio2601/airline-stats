@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const columnHeaders = [
   {key: "departures_performed", value: "Departures performed"},
-  {key: "seats", value: "Seats (per flight)"},
+  {key: "seats", value: "Seats"},
   {key: "asms", value: "ASMs", className: "hidden md:block"},
-  {key: "passengers", value: "Passengers (per flight)"},
+  {key: "passengers", value: "Passengers"},
   {key: "rpms", value: "RPMs", className: "hidden md:block"},
   {key: "load_factor", value: "Load Factor"},
 ]

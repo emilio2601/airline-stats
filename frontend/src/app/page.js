@@ -13,8 +13,7 @@ import AirportFilter from './components/filters/AirportFilter';
 import CountryFilter from './components/filters/CountryFilter';
 import DateFilter from './components/filters/DateFilter';
 import BaseFilter from './components/BaseFilter';
-import SaveSearchButton from './components/SaveSearchButton';
-import MySearchesButton from './components/MySearchesButton';
+import SavedSearches from './components/SavedSearches';
 import ViewSettings from './components/ViewSettings';
 import MoreFilters from './components/MoreFilters';
 
@@ -162,8 +161,7 @@ export default function Home({ initialFilters, savedSearch }) {
           formattingOptions={formattingOptions}
           setFormattingOptions={setFormattingOptions}
         />
-        <SaveSearchButton filters={filters} />
-        <MySearchesButton />
+        <SavedSearches filters={filters} />
       </div>
 
       <table className='border-spacing-2 text-center border border-separate border-white'>

@@ -93,7 +93,7 @@ const GroupingTab = ({ setFilters, filters }) => {
         </div>
       </div>
 
-      <button className='bg-green-500 p-2 text-white rounded-md w-full mt-2' onClick={applyFilter}>Apply Grouping</button>
+      <button className='bg-green-500 p-2 text-white rounded-md w-full' onClick={applyFilter}>Apply Grouping</button>
     </div>
   )
 }

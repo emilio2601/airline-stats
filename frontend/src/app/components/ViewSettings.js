@@ -17,7 +17,7 @@ const ViewSettings = ({ filters, setFilters, visibleColumns, setVisibleColumns, 
       </WfPopover.Trigger>
       <WfPopover.Container>
         <div className="flex flex-col text-sm space-y-4 text-gray-900 w-80">
-          <div className="flex border-b">
+          <div className="flex justify-between border-b">
             <button
               className={`px-4 py-2 text-base ${activeTab === 'grouping' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
               onClick={() => setActiveTab('grouping')}
