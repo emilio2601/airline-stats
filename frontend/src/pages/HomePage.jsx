@@ -201,8 +201,8 @@ export default function HomePage({ initialFilters, savedSearch }) {
         </thead>
         <tbody>
           {data.routes && data.routes.map((route) => {
-            const aircraft = route.aircraft_type ? aircraftCodes.find(ac => ac.code === route.aircraft_type) : null;
-            const aircraftName = aircraft ? `${aircraft.name} (${aircraft.icao})` : route.aircraft_type;
+            const aircraft = route.aircraft_type ? aircraftCodesMap[route.aircraft_type] : null;
+            const aircraftName = aircraft ? `${aircraft.name} (${aircraft.icao.join(', ')})` : route.aircraft_type;
             
             return (
               <tr key={route.id}>
