@@ -48,6 +48,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
 
   const [data, setData] = useState({});
   const [dateRange, setDateRange] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState(initialFilters || defaultFilters);
   const [isSavedSearchView, setIsSavedSearchView] = useState(!!savedSearch);
   
@@ -85,9 +86,34 @@ export default function HomePage({ initialFilters, savedSearch }) {
 
   // This is the single source of truth for fetching data when filters change.
   useEffect(() => {
-    axios.get(`${baseURL}/routes`, {params: filters}).then((response) => {
+    const controller = new AbortController();
+
+    // Set a loading state to provide visual feedback in the UI
+    setIsLoading(true);
+    axios.get(`${baseURL}/routes`, {
+      params: filters,
+      // This signal allows us to cancel the request if a new one is made
+      signal: controller.signal
+    }).then((response) => {
       setData(response.data);
+    }).catch((error) => {
+      // If the error is a cancellation, we don't need to do anything.
+      if (axios.isCancel(error)) {
+        console.log("Request canceled:", error.message);
+      } else {
+        // Handle other errors if needed
+        console.error("Error fetching data:", error);
+      }
+    }).finally(() => {
+      // Always set loading to false when the request is complete
+      setIsLoading(false);
     });
+
+    // The cleanup function will be called when the component re-renders
+    // or unmounts, canceling any pending request.
+    return () => {
+      controller.abort();
+    };
   }, [filters]);
 
   useEffect(() => {
@@ -153,7 +179,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
           {savedSearch.search_name && <span className="block sm:inline">: {savedSearch.search_name}</span>}
         </div>
       )}
-      <div className="flex flex-row flex-wrap gap-4 justify-center">
+      <div className={`flex flex-row flex-wrap gap-4 justify-center transition-opacity ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
         <BaseFilter setFilters={handleFilterChange} filters={filters} component={AirportFilter} />
         <BaseFilter setFilters={handleFilterChange} filters={filters} component={CountryFilter} />
         <BaseFilter setFilters={handleFilterChange} filters={filters} component={DateFilter} />
@@ -169,30 +195,35 @@ export default function HomePage({ initialFilters, savedSearch }) {
         <SavedSearches filters={filters} />
       </div>
 
-      <table className='border-spacing-2 text-center border border-separate border-white'>
+      <table className={`border-spacing-2 text-center border border-separate border-white w-full transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
         <thead>
           <TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
         </thead>
         <tbody>
-          {data.routes && data.routes.map((route) => (
-            <tr key={route.id}>
-              {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
-              {filters.group_by?.includes("aircraft_type") && <td>{aircraftCodes[route.aircraft_type] || route.aircraft_type} ({route.aircraft_type})</td>}
-              {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
-              {filters.group_by?.includes("dest") && <td>{route.dest}</td>}
-              {filters.group_by?.includes("origin_country") && <td>{route.origin_country}</td>}
-              {filters.group_by?.includes("dest_country") && <td>{route.dest_country}</td>}
-              {filters.group_by?.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
-              {filters.group_by?.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
-              {filters.group_by?.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
-              {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
-              {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.seats / route.departures_performed))})`}</td>}
-              {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
-              {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.passengers / route.departures_performed))})`}</td>}
-              {visibleColumns.rpms && <td className="hidden md:block">{formatNumber(route.rpms)}</td>}
-              {visibleColumns.load_factor && <td>{getFormattedLoadFactor(route.load_factor)}</td>}
-            </tr>
-          ))}
+          {data.routes && data.routes.map((route) => {
+            const aircraft = route.aircraft_type ? aircraftCodes.find(ac => ac.code === route.aircraft_type) : null;
+            const aircraftName = aircraft ? `${aircraft.name} (${aircraft.icao})` : route.aircraft_type;
+            
+            return (
+              <tr key={route.id}>
+                {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
+                {filters.group_by?.includes("aircraft_type") && <td>{aircraftName}</td>}
+                {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
+                {filters.group_by?.includes("dest") && <td>{route.dest}</td>}
+                {filters.group_by?.includes("origin_country") && <td>{route.origin_country}</td>}
+                {filters.group_by?.includes("dest_country") && <td>{route.dest_country}</td>}
+                {filters.group_by?.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
+                {filters.group_by?.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
+                {filters.group_by?.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
+                {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
+                {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.seats / route.departures_performed))})`}</td>}
+                {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
+                {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.passengers / route.departures_performed))})`}</td>}
+                {visibleColumns.rpms && <td className="hidden md:block">{formatNumber(route.rpms)}</td>}
+                {visibleColumns.load_factor && <td>{getFormattedLoadFactor(route.load_factor)}</td>}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
       <div className="flex w-full justify-between items-center">
