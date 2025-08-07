@@ -36,6 +36,13 @@ const quarterMap = {
   "10": "Q4"
 }
 
+const serviceClassMap = {
+  'F': 'Scheduled Passenger',
+  'G': 'Scheduled Cargo',
+  'L': 'Charter Passenger',
+  'P': 'Charter Cargo',
+}
+
 export default function Home({ initialFilters, savedSearch }) {
   const [data, setData] = useState({});
   const [dateRange, setDateRange] = useState({});
@@ -415,7 +422,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   useEffect(() => {
     setConfig({name: "Class", keys: ["service_class"]});
     if (filters.service_class) {
-      setBreakdown(filters.service_class)
+      setBreakdown(serviceClassMap[filters.service_class] || filters.service_class)
     } else {
       setBreakdown(null)
     }
@@ -424,7 +431,13 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   return (
     <>
       <span>Filter by Class</span>
-      <input type="text" placeholder="T-100 class" value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2"/>
+      <select value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2 w-full">
+        <option value="">Any</option>
+        <option value="F">Scheduled Passenger</option>
+        <option value="G">Scheduled Cargo</option>
+        <option value="L">Charter Passenger</option>
+        <option value="P">Charter Cargo</option>
+      </select>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>
   ) 
