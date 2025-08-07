@@ -8,7 +8,7 @@ const SavedSearches = ({ filters }) => {
   const [searchName, setSearchName] = useState("");
   const [shareableLink, setShareableLink] = useState("");
 
-  const baseURL = process.env.NODE_ENV == "development" ? "http://localhost:3210" : "";
+  const baseURL = "/api";
 
   const fetchSearches = async () => {
     try {
