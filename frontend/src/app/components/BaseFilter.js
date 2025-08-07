@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import WfPopover from '../wf_popover';
 
-const BaseFilter = ({ component: Component, setFilters, filters }) => {
+const BaseFilter = ({ component: Component, setFilters, filters, dark }) => {
   const [breakdown, setBreakdown] = useState(null)
   const [config, setConfig] = useState({name: "", keys: []})
 
@@ -23,7 +23,7 @@ const BaseFilter = ({ component: Component, setFilters, filters }) => {
     <WfPopover trigger={"click"} placement="bottom-start" color="white" renderCallback={({ closePopover }) => (
       <>
         <WfPopover.Trigger>
-          <div className="text-coolgray-700 font-medium flex w-max rounded-full border border-coolgray-400 border-dashed px-3 py-1 cursor-pointer hover:bg-coolgray-50">
+          <div className={`text-coolgray-700 font-medium flex w-max rounded-full border border-dashed px-3 py-1 cursor-pointer hover:bg-coolgray-50 ${dark ? "border-gray-800" : "border-coolgray-300"}`}>
             <div>
               {breakdown  && <i className="fa fa-times-circle pr-1.5" onClick={(e) => handleFilterClear(e, closePopover)} />}
               {!breakdown && <i className="fa fa-plus-circle pr-1.5" />}
