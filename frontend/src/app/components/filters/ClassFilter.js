@@ -16,7 +16,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   }
 
   useEffect(() => {
-    setConfig({name: "Class", keys: ["service_class"]});
+    setConfig({name: "Service Class", keys: ["service_class"]});
     if (filters.service_class) {
       setBreakdown(serviceClassMap[filters.service_class] || filters.service_class)
     } else {
@@ -25,17 +25,15 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   }, [filters.service_class, setConfig, setBreakdown])
 
   return (
-    <>
-      <span>Filter by Class</span>
+    <div className="w-48 space-y-4">
+      <span>Filter by Service Class</span>
       <select value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2 w-full">
-        <option value="">Any</option>
-        <option value="F">Scheduled Passenger</option>
-        <option value="G">Scheduled Cargo</option>
-        <option value="L">Charter Passenger</option>
-        <option value="P">Charter Cargo</option>
+        {Object.keys(serviceClassMap).map((key) => (
+          <option value={key}>{serviceClassMap[key]}</option>
+        ))}
       </select>
-      <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
-    </>
+      <button className='bg-green-500 p-2 text-white rounded-md w-full' onClick={applyFilter}>Apply</button>
+    </div>
   ) 
 }
 
