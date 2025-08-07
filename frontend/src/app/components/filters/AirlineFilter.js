@@ -29,7 +29,7 @@ const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   return (
     <>
-      <span>Filter by Airline</span>
+      <span className="font-bold text-base">Filter by Airline</span>
       <input type="text" placeholder="IATA code" value={inputAirline} onChange={(e) => setInputAirline(e.target.value)} className="border p-2"/>
       {airlines.length > 0 && <div className="flex flex-row space-x-3">
         {airlines.map((a, i) => (

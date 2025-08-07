@@ -59,7 +59,7 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters
 
   return (
     <>
-      <span>Filter by Date</span>
+      <span className="font-bold text-base">Filter by Date</span>
       <select value={dropdownChoice} onChange={(e) => setDropdownChoice(e.target.value)} className="border p-2">
         <option value="between">is between</option>
         <option value="last_x">is in the last</option>

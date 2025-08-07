@@ -19,7 +19,7 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig, fil
 
   return (
     <>
-      <span>Filter by Aircraft</span>
+      <span className="font-bold text-base">Filter by Aircraft</span>
       <input type="text" placeholder="ICAO code" value={aircraftType} onChange={(e) => setAircraftType(e.target.value)} className="border p-2"/>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>

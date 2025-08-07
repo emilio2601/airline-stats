@@ -26,7 +26,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
 
   return (
     <div className="w-48 space-y-4">
-      <span>Filter by Service Class</span>
+      <span className="font-bold text-base">Filter by Class</span>
       <select value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2 w-full">
         {Object.keys(serviceClassMap).map((key) => (
           <option value={key}>{serviceClassMap[key]}</option>

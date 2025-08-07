@@ -42,7 +42,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   return (
     <>
-      <span>Filter by Country</span>
+      <span className="font-bold text-base">Filter by Country</span>
       <div className="flex flex-row space-x-2">
         <input type="text" placeholder="Origin" value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className="border p-2 w-24"/>
         <button className="cursor-pointer" onClick={flipOriginDest}>

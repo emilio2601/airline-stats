@@ -1,7 +1,6 @@
-Rails.application.config.session_store :redis_session_store,
-  servers: ["redis://localhost:6379/0/session"],
-  expire_after: 90.days,
-  key: "_#{Rails.application.class.module_parent_name.downcase}_session",
-  threadsafe: true,
-  signed: true,
+Rails.application.config.session_store :cookie_store, 
+  key: '_airline_stats_session', 
+  domain: :all, 
+  tld_length: 2,
+  same_site: :lax,
   secure: Rails.env.production? 
