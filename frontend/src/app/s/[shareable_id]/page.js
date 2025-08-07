@@ -1,5 +1,5 @@
 'use client';
-import Home from "../page";
+import Home from "../../page";
 import axios from "axios";
 
 export const dynamic = 'force-dynamic';
