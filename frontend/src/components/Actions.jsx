@@ -9,9 +9,9 @@ const Actions = ({ filters, onExport }) => {
   return (
     <WfPopover trigger={"click"} placement="bottom-end" color="white">
       <WfPopover.Trigger>
-        <button className="text-coolgray-700 font-medium flex w-max rounded-full border border-coolgray-400 border-dashed px-3 py-1 cursor-pointer hover:bg-coolgray-50 items-center">
-          <i className="fa fa-cogs pr-1.5"></i>
-          <span>Actions</span>
+        <button className="text-coolgray-700 font-medium flex w-max rounded-full border border-coolgray-400 border-dashed px-3 py-1 cursor-pointer hover:bg-coolgray-50 items-center" title="Share & export">
+          <i className="fa fa-share-nodes pr-1.5"></i>
+          <span>Share</span>
         </button>
       </WfPopover.Trigger>
       <WfPopover.Container>
