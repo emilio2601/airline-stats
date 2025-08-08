@@ -39,33 +39,41 @@ class RouteSearch
   def base_scope
     scope = RouteSummary.all
 
-    if bidirectional_airport? && params[:origin].present? && params[:dest].present?
-      scope = scope.where(origin: params[:dest], dest: params[:origin]).or(RouteSummary.where(origin: params[:origin], dest: params[:dest]))
-    elsif bidirectional_airport? && params[:origin].present?
-      scope = scope.where(origin: params[:origin]).or(RouteSummary.where(dest: params[:origin]))
-    elsif bidirectional_airport? && params[:dest].present?
-      scope = scope.where(dest: params[:dest]).or(RouteSummary.where(origin: params[:dest]))
+    # --- Standard Filters ---
+    [:carrier, :aircraft_type, :service_class].each do |key|
+      scope = scope.where(key => params[key]) if params[key].present?
+    end
+    
+    scope = scope.where(month: params[:from_date]..) if params[:from_date].present?
+    scope = scope.where(month: ..params[:to_date]) if params[:to_date].present?
+
+    # --- Airport Filters (with bidirectional logic) ---
+    if bidirectional_airport?
+      if params[:origin].present? && params[:dest].present?
+        scope = scope.where(origin: params[:dest], dest: params[:origin]).or(RouteSummary.where(origin: params[:origin], dest: params[:dest]))
+      elsif params[:origin].present?
+        scope = scope.where(origin: params[:origin]).or(RouteSummary.where(dest: params[:origin]))
+      elsif params[:dest].present?
+        scope = scope.where(dest: params[:dest]).or(RouteSummary.where(origin: params[:dest]))
+      end
     else
       scope = scope.where(origin: params[:origin]) if params[:origin].present?
       scope = scope.where(dest: params[:dest]) if params[:dest].present?
     end
-    
-    if bidirectional_country? && params[:origin_country].present? && params[:dest_country].present?
-      scope = scope.where(origin_country: params[:dest_country], dest_country: params[:origin_country]).or(RouteSummary.where(origin_country: params[:origin_country], dest_country: params[:dest_country]))
-    elsif bidirectional_country? && params[:origin_country].present?
-      scope = scope.where(origin_country: params[:origin_country]).or(RouteSummary.where(dest_country: params[:origin_country]))
-    elsif bidirectional_country? && params[:dest_country].present?
-      scope = scope.where(dest_country: params[:dest_country]).or(RouteSummary.where(origin_country: params[:dest_country]))
+
+    # --- Country Filters (with bidirectional logic) ---
+    if bidirectional_country?
+      if params[:origin_country].present? && params[:dest_country].present?
+        scope = scope.where(origin_country: params[:dest_country], dest_country: params[:origin_country]).or(RouteSummary.where(origin_country: params[:origin_country], dest_country: params[:dest_country]))
+      elsif params[:origin_country].present?
+        scope = scope.where(origin_country: params[:origin_country]).or(RouteSummary.where(dest_country: params[:origin_country]))
+      elsif params[:dest_country].present?
+        scope = scope.where(dest_country: params[:dest_country]).or(RouteSummary.where(origin_country: params[:dest_country]))
+      end
     else
       scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
       scope = scope.where(dest_country: params[:dest_country]) if params[:dest_country].present?
     end
-
-    scope = scope.where(carrier: params[:carrier]) if params[:carrier].present?
-    scope = scope.where(aircraft_type: params[:aircraft_type]) if params[:aircraft_type].present?
-    scope = scope.where(service_class: params[:service_class]) if params[:service_class].present?
-    scope = scope.where("month >= ?", params[:from_date]) if params[:from_date].present?
-    scope = scope.where("month <= ?", params[:to_date]) if params[:to_date].present?
 
     scope
   end
