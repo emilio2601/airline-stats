@@ -169,7 +169,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
 
   const handleExport = () => {
     const visibleColumnKeys = Object.keys(visibleColumns).filter(key => visibleColumns[key]);
-    const exportFilters = { ...filters, visible_columns: visibleColumnKeys };
+    const exportFilters = { ...filters, visible_columns: visibleColumnKeys, per_flight: formattingOptions.showPerFlightAverage };
 
     const csvUrl = axios.getUri({
       url: `${baseURL}/routes.csv`,
@@ -226,9 +226,9 @@ export default function HomePage({ initialFilters, savedSearch }) {
                 {filters.group_by?.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
                 {filters.group_by?.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
                 {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
-                {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.seats / route.departures_performed))})`}</td>}
+                {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && route.seats_per_flight != null && `(${formatNumber(route.seats_per_flight)})`}</td>}
                 {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
-                {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && `(${formatNumber(Math.round(route.passengers / route.departures_performed))})`}</td>}
+                {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && route.passengers_per_flight != null && `(${formatNumber(route.passengers_per_flight)})`}</td>}
                 {visibleColumns.rpms && <td className="hidden md:block">{formatNumber(route.rpms)}</td>}
                 {visibleColumns.load_factor && <td>{getFormattedLoadFactor(route.load_factor)}</td>}
               </tr>

@@ -83,14 +83,23 @@ class RouteSearch
       "SUM(departures_scheduled) AS departures_scheduled",
       "SUM(departures_performed) AS departures_performed",
       "SUM(seats) AS seats",
+      "(SUM(seats)::numeric / NULLIF(SUM(departures_performed)::numeric, 0)) AS seats_per_flight",  
       "SUM(passengers) AS passengers",
+      "(SUM(passengers)::numeric / NULLIF(SUM(departures_performed)::numeric, 0)) AS passengers_per_flight",
       "SUM(asms) AS asms",
       "SUM(rpms) AS rpms",
-      "SUM(passengers) / NULLIF(SUM(seats::float), 0) AS load_factor"
+      "(SUM(passengers)::numeric / NULLIF(SUM(seats)::numeric, 0)) AS load_factor"
     ]
 
+    # When exporting CSV, optionally filter by visible columns and
+    # include per-flight columns alongside their base metrics when requested
     if params[:visible_columns].present?
-      select_statements.select! { |s| params[:visible_columns].include?(s.split(' AS ').last) }
+      allowed_aliases = Array.wrap(params[:visible_columns]).dup
+      if ActiveRecord::Type::Boolean.new.deserialize(params[:per_flight])
+        allowed_aliases << 'seats_per_flight' if allowed_aliases.include?('seats')
+        allowed_aliases << 'passengers_per_flight' if allowed_aliases.include?('passengers')
+      end
+      select_statements.select! { |s| allowed_aliases.include?(s.split(' AS ').last) }
     end
 
     (group_aliases + select_statements).join(", ")
@@ -135,7 +144,7 @@ class RouteSearch
       "SUM(#{order_by}) #{order_dir}"
     elsif order_by == "load_factor"
       # Special case for the calculated load_factor
-      "(SUM(passengers) / NULLIF(SUM(seats::float), 0)) #{order_dir} NULLS LAST"
+      "(SUM(passengers)::numeric / NULLIF(SUM(seats)::numeric, 0)) #{order_dir} NULLS LAST"
     else
       # This must be a regular grouping column (e.g., carrier)
       "#{order_by} #{order_dir}"
