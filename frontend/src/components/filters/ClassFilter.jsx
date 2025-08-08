@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const serviceClassMap = {
+export const serviceClassMap = {
   'F': 'Scheduled Passenger',
   'G': 'Scheduled Cargo',
   'L': 'Charter Passenger',
