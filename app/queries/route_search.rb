@@ -89,6 +89,10 @@ class RouteSearch
       "SUM(passengers) / NULLIF(SUM(seats::float), 0) AS load_factor"
     ]
 
+    if params[:visible_columns].present?
+      select_statements.select! { |s| params[:visible_columns].include?(s.split(' AS ').last) }
+    end
+
     (group_aliases + select_statements).join(", ")
   end
 
