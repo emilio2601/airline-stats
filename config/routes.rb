@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   scope '/api' do
-    resources :routes, only: [:index] do
+    resources :routes, only: [:index], defaults: { format: :json } do
       get :date_range, on: :collection
     end
 

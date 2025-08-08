@@ -36,4 +36,18 @@ class RouteSummary < ApplicationRecord
   def readonly?
     true
   end
+
+  def self.to_csv(routes)
+    return "" if routes.empty?
+    
+    attributes = routes.first.attributes.keys
+    
+    CSV.generate(headers: true) do |csv|
+      csv << attributes
+      
+      routes.each do |route|
+        csv << attributes.map{ |attr| route.send(attr) }
+      end
+    end
+  end
 end 

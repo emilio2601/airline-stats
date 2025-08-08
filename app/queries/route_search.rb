@@ -19,6 +19,10 @@ class RouteSearch
       .group(group_expressions)
       .order(Arel.sql(order_clause))
 
+    if params[:format] == 'csv'
+      return { routes: scope.to_a, total_items: scope.to_a.length, total_pages: 1 }
+    end
+
     pagy, routes = pagy(scope, items: params[:items_per_page] || 20)
 
     {
