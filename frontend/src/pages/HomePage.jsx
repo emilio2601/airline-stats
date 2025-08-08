@@ -84,33 +84,29 @@ export default function HomePage({ initialFilters, savedSearch }) {
 
   const baseURL = "/api";
 
-  // This is the single source of truth for fetching data when filters change.
-  useEffect(() => {
-    const controller = new AbortController();
-
-    // Set a loading state to provide visual feedback in the UI
+  const fetchRoutes = async (controller) => {
     setIsLoading(true);
-    axios.get(`${baseURL}/routes`, {
-      params: filters,
-      // This signal allows us to cancel the request if a new one is made
-      signal: controller.signal
-    }).then((response) => {
+    try {
+      const response = await axios.get(`${baseURL}/routes`, {
+        params: filters,
+        signal: controller.signal,
+      });
       setData(response.data);
-    }).catch((error) => {
-      // If the error is a cancellation, we don't need to do anything.
+    } catch (error) {
       if (axios.isCancel(error)) {
         console.log("Request canceled:", error.message);
       } else {
-        // Handle other errors if needed
         console.error("Error fetching data:", error);
       }
-    }).finally(() => {
-      // Always set loading to false when the request is complete
+    } finally {
       setIsLoading(false);
-    });
+    }
+  };
 
-    // The cleanup function will be called when the component re-renders
-    // or unmounts, canceling any pending request.
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchRoutes(controller);
+
     return () => {
       controller.abort();
     };
@@ -172,7 +168,14 @@ export default function HomePage({ initialFilters, savedSearch }) {
   }
 
   const handleExport = () => {
-    const csvUrl = `${baseURL}/routes.csv?${new URLSearchParams(filters).toString()}`;
+    const visibleColumnKeys = Object.keys(visibleColumns).filter(key => visibleColumns[key]);
+    const exportFilters = { ...filters, visible_columns: visibleColumnKeys };
+
+    const csvUrl = axios.getUri({
+      url: `${baseURL}/routes.csv`,
+      params: exportFilters,
+    });
+    
     window.open(csvUrl, '_blank');
   };
 
