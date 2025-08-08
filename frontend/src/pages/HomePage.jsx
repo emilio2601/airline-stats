@@ -11,8 +11,8 @@ import AirportFilter from '../components/filters/AirportFilter';
 import CountryFilter from '../components/filters/CountryFilter';
 import DateFilter from '../components/filters/DateFilter';
 import BaseFilter from '../components/BaseFilter';
-import SavedSearches from '../components/SavedSearches';
 import ViewSettings from '../components/ViewSettings';
+import Actions from '../components/Actions';
 import MoreFilters from '../components/MoreFilters';
 
 const quarterMap = {
@@ -171,6 +171,11 @@ export default function HomePage({ initialFilters, savedSearch }) {
     handleFilterChange({...filters, page: filters.page + 1})
   }
 
+  const handleExport = () => {
+    const csvUrl = `${baseURL}/routes.csv?${new URLSearchParams(filters).toString()}`;
+    window.open(csvUrl, '_blank');
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center p-12 lg:p-24 space-y-4 max-w-max mx-auto">
       {isSavedSearchView && savedSearch && (
@@ -192,7 +197,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
           formattingOptions={formattingOptions}
           setFormattingOptions={setFormattingOptions}
         />
-        <SavedSearches filters={filters} />
+        <Actions filters={filters} onExport={handleExport} />
       </div>
 
       <table className={`border-spacing-2 text-center border border-separate border-white w-full transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
@@ -201,11 +206,13 @@ export default function HomePage({ initialFilters, savedSearch }) {
         </thead>
         <tbody>
           {data.routes && data.routes.map((route) => {
-            const aircraft = route.aircraft_type ? aircraftCodesMap[route.aircraft_type] : null;
-            const aircraftName = aircraft ? `${aircraft.name} (${aircraft.icao.join(', ')})` : route.aircraft_type;
+            const aircraft = route.aircraft_type ? aircraftCodes.find(a => a.code == route.aircraft_type) : null;
+            const aircraftName = aircraft ? `${aircraft.name} ${aircraft.icao ? `(${aircraft.icao.join(', ')})` : ''}` : route.aircraft_type;
+            
+            const key = filters.group_by.map(col => route[col]).join('-');
             
             return (
-              <tr key={route.id}>
+              <tr key={key}>
                 {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
                 {filters.group_by?.includes("aircraft_type") && <td>{aircraftName}</td>}
                 {filters.group_by?.includes("origin") && <td>{route.origin}</td>}

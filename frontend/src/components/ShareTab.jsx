@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import WfPopover from './wf_popover';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const SavedSearches = ({ filters }) => {
+const ShareTab = ({ filters }) => {
   const [searches, setSearches] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [searchName, setSearchName] = useState("");
@@ -18,6 +17,10 @@ const SavedSearches = ({ filters }) => {
       console.error("Error fetching saved searches:", error);
     }
   };
+
+  useEffect(() => {
+    fetchSearches();
+  }, []);
 
   const handleDelete = async (id, e) => {
     e.preventDefault();
@@ -55,53 +58,40 @@ const SavedSearches = ({ filters }) => {
 
   return (
     <>
-      <WfPopover trigger={"click"} placement="bottom-end" color="white">
-        <WfPopover.Trigger>
-          <button 
-            onClick={fetchSearches}
-            className="text-coolgray-700 font-medium flex w-max rounded-full border border-coolgray-400 border-dashed px-3 py-1 cursor-pointer hover:bg-coolgray-50 items-center"
-          >
-            <i className="fa fa-list pr-1.5"></i>
-            <span>Saved Searches</span>
-          </button>
-        </WfPopover.Trigger>
-        <WfPopover.Container>
-          <div className="flex flex-col text-sm text-gray-900 min-w-64 pr-2 pb-2">
-            <h3 className="font-bold text-base mb-2">Your Saved Searches</h3>
-            <div className="space-y-2">
-              {searches.length > 0 ? (
-                searches.map((search) => (
-                  <a
-                    key={search.id}
-                    href={`/s/${search.shareable_id}`}
-                    className="block p-2 rounded-md hover:bg-gray-100 group"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span>{search.search_name || "Untitled Search"}</span>
-                      <button
-                        onClick={(e) => handleDelete(search.id, e)}
-                        className="text-red-500 opacity-0 group-hover:opacity-100"
-                      >
-                        <i className="fa fa-trash"></i>
-                      </button>
-                    </div>
-                  </a>
-                ))
-              ) : (
-                <p className="text-gray-500">You have no saved searches.</p>
-              )}
-            </div>
-            <div className="mt-4 pt-2">
-              <button 
-                onClick={() => setShowSaveModal(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+      <div className="flex flex-col text-sm text-gray-900 min-w-64 pr-2 pb-2">
+        <h3 className="font-bold text-base mb-2">Your Saved Searches</h3>
+        <div className="space-y-2">
+          {searches.length > 0 ? (
+            searches.map((search) => (
+              <a
+                key={search.id}
+                href={`/s/${search.shareable_id}`}
+                className="block p-2 rounded-md hover:bg-gray-100 group"
               >
-                Save Current Search
-              </button>
-            </div>
-          </div>
-        </WfPopover.Container>
-      </WfPopover>
+                <div className="flex justify-between items-center">
+                  <span>{search.search_name || "Untitled Search"}</span>
+                  <button
+                    onClick={(e) => handleDelete(search.id, e)}
+                    className="text-red-500 opacity-0 group-hover:opacity-100"
+                  >
+                    <i className="fa fa-trash"></i>
+                  </button>
+                </div>
+              </a>
+            ))
+          ) : (
+            <p className="text-gray-500">You have no saved searches.</p>
+          )}
+        </div>
+        <div className="mt-4 pt-2">
+          <button 
+            onClick={() => setShowSaveModal(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+          >
+            Save Current Search
+          </button>
+        </div>
+      </div>
 
       {showSaveModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -169,4 +159,4 @@ const SavedSearches = ({ filters }) => {
   );
 };
 
-export default SavedSearches; 
+export default ShareTab;
