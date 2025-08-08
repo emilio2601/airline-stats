@@ -8,11 +8,16 @@ const serviceClassMap = {
 }
 
 const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters }) => {
-  const [serviceClass, setServiceClass] = useState(filters.service_class || '')
+  const [serviceClass, setServiceClass] = useState(filters.service_class || 'F')
 
   const applyFilter = () => {
-    closePopover()
     setFilters((f) => ({ ...f, service_class: serviceClass}))
+    closePopover()
+  }
+
+  const handleChange = (e) => {
+    const value = e.target.value
+    setServiceClass(value)
   }
 
   useEffect(() => {
@@ -27,9 +32,9 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   return (
     <div className="w-56 space-y-4">
       <span className="font-bold text-base">Filter by Service Class</span>
-      <select value={serviceClass} onChange={(e) => setServiceClass(e.target.value)} className="border p-2 w-full">
+      <select value={serviceClass} onChange={handleChange} className="border p-2 w-full">
         {Object.keys(serviceClassMap).map((key) => (
-          <option value={key}>{serviceClassMap[key]}</option>
+          <option key={key} value={key}>{serviceClassMap[key]}</option>
         ))}
       </select>
       <button className='bg-green-500 p-2 text-white rounded-md w-full' onClick={applyFilter}>Apply</button>
