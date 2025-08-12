@@ -49,12 +49,16 @@ class RouteSearch
 
     # --- Airport Filters (with bidirectional logic) ---
     if bidirectional_airport?
+      base = scope
       if params[:origin].present? && params[:dest].present?
-        scope = scope.where(origin: params[:dest], dest: params[:origin]).or(RouteSummary.where(origin: params[:origin], dest: params[:dest]))
+        scope = base.where(origin: params[:dest], dest: params[:origin])
+                    .or(base.where(origin: params[:origin], dest: params[:dest]))
       elsif params[:origin].present?
-        scope = scope.where(origin: params[:origin]).or(RouteSummary.where(dest: params[:origin]))
+        scope = base.where(origin: params[:origin])
+                    .or(base.where(dest: params[:origin]))
       elsif params[:dest].present?
-        scope = scope.where(dest: params[:dest]).or(RouteSummary.where(origin: params[:dest]))
+        scope = base.where(dest: params[:dest])
+                    .or(base.where(origin: params[:dest]))
       end
     else
       scope = scope.where(origin: params[:origin]) if params[:origin].present?
@@ -63,12 +67,16 @@ class RouteSearch
 
     # --- Country Filters (with bidirectional logic) ---
     if bidirectional_country?
+      base = scope
       if params[:origin_country].present? && params[:dest_country].present?
-        scope = scope.where(origin_country: params[:dest_country], dest_country: params[:origin_country]).or(RouteSummary.where(origin_country: params[:origin_country], dest_country: params[:dest_country]))
+        scope = base.where(origin_country: params[:dest_country], dest_country: params[:origin_country])
+                    .or(base.where(origin_country: params[:origin_country], dest_country: params[:dest_country]))
       elsif params[:origin_country].present?
-        scope = scope.where(origin_country: params[:origin_country]).or(RouteSummary.where(dest_country: params[:origin_country]))
+        scope = base.where(origin_country: params[:origin_country])
+                    .or(base.where(dest_country: params[:origin_country]))
       elsif params[:dest_country].present?
-        scope = scope.where(dest_country: params[:dest_country]).or(RouteSummary.where(origin_country: params[:dest_country]))
+        scope = base.where(dest_country: params[:dest_country])
+                    .or(base.where(origin_country: params[:dest_country]))
       end
     else
       scope = scope.where(origin_country: params[:origin_country]) if params[:origin_country].present?
