@@ -61,6 +61,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
     showPerFlightAverage: true,
     rounding: 'none',
     decimalPrecision: 0,
+    aircraftIcaoOnly: false,
   });
 
   const handleFilterChange = (newFilters) => {
@@ -210,7 +211,21 @@ export default function HomePage({ initialFilters, savedSearch }) {
         <tbody>
           {data.routes && data.routes.map((route, idx) => {
             const aircraft = route.aircraft_type ? aircraftCodes.find(a => a.code == route.aircraft_type) : null;
-            const aircraftName = aircraft ? `${aircraft.name} ${aircraft.icao ? `(${aircraft.icao.join(', ')})` : ''}` : route.aircraft_type;
+            let aircraftDisplay = route.aircraft_type;
+            if (aircraft) {
+              if (formattingOptions.aircraftIcaoOnly) {
+                if (aircraft.icao && Array.isArray(aircraft.icao) && aircraft.icao.length > 0) {
+                  aircraftDisplay = aircraft.icao[0];
+                } else if (typeof aircraft.icao === 'string' && aircraft.icao.length > 0) {
+                  aircraftDisplay = aircraft.icao;
+                } else {
+                  aircraftDisplay = aircraft.name;
+                }
+              } else {
+                const icaoText = aircraft.icao ? (Array.isArray(aircraft.icao) ? aircraft.icao.join(', ') : aircraft.icao) : '';
+                aircraftDisplay = `${aircraft.name} ${icaoText ? `(${icaoText})` : ''}`;
+              }
+            }
             
             const keyBase = filters.group_by.map(col => (route[col] ?? '')).join('-');
             const key = `${keyBase}-${idx}`;
@@ -218,7 +233,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
             return (
               <tr key={key}>
                 {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
-                {filters.group_by?.includes("aircraft_type") && <td>{aircraftName}</td>}
+                {filters.group_by?.includes("aircraft_type") && <td>{aircraftDisplay}</td>}
                 {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
                 {filters.group_by?.includes("dest") && <td>{route.dest}</td>}
                 {filters.group_by?.includes("origin_country") && <td>{route.origin_country}</td>}
