@@ -208,11 +208,12 @@ export default function HomePage({ initialFilters, savedSearch }) {
           <TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
         </thead>
         <tbody>
-          {data.routes && data.routes.map((route) => {
+          {data.routes && data.routes.map((route, idx) => {
             const aircraft = route.aircraft_type ? aircraftCodes.find(a => a.code == route.aircraft_type) : null;
             const aircraftName = aircraft ? `${aircraft.name} ${aircraft.icao ? `(${aircraft.icao.join(', ')})` : ''}` : route.aircraft_type;
             
-            const key = filters.group_by.map(col => route[col]).join('-');
+            const keyBase = filters.group_by.map(col => (route[col] ?? '')).join('-');
+            const key = `${keyBase}-${idx}`;
             
             return (
               <tr key={key}>
