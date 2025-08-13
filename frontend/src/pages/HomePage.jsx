@@ -62,6 +62,9 @@ export default function HomePage({ initialFilters, savedSearch }) {
     rounding: 'none',
     decimalPrecision: 0,
     aircraftIcaoOnly: false,
+    airlineIataOnly: false,
+    aircraftLabelFormat: 'name_icao',
+    airlineLabelFormat: 'name_only',
   });
 
   const handleFilterChange = (newFilters) => {
@@ -204,7 +207,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
         <Actions filters={filters} onExport={handleExport} />
       </div>
 
-      <table className={`border-spacing-2 text-center border border-separate border-white w-full transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
+      <table className={`border-spacing-2 px-2 text-center border border-separate border-white w-full transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
         <thead>
           <TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
         </thead>
@@ -213,16 +216,13 @@ export default function HomePage({ initialFilters, savedSearch }) {
             const aircraft = route.aircraft_type ? aircraftCodes.find(a => a.code == route.aircraft_type) : null;
             let aircraftDisplay = route.aircraft_type;
             if (aircraft) {
-              if (formattingOptions.aircraftIcaoOnly) {
-                if (aircraft.icao && Array.isArray(aircraft.icao) && aircraft.icao.length > 0) {
-                  aircraftDisplay = aircraft.icao[0];
-                } else if (typeof aircraft.icao === 'string' && aircraft.icao.length > 0) {
-                  aircraftDisplay = aircraft.icao;
-                } else {
-                  aircraftDisplay = aircraft.name;
-                }
+              const icaoText = aircraft.icao ? (Array.isArray(aircraft.icao) ? aircraft.icao.join(', ') : aircraft.icao) : '';
+              const format = formattingOptions.aircraftLabelFormat || (formattingOptions.aircraftIcaoOnly ? 'icao_only' : 'name_icao');
+              if (format === 'icao_only') {
+                aircraftDisplay = icaoText || aircraft.name;
+              } else if (format === 'name_only') {
+                aircraftDisplay = aircraft.name;
               } else {
-                const icaoText = aircraft.icao ? (Array.isArray(aircraft.icao) ? aircraft.icao.join(', ') : aircraft.icao) : '';
                 aircraftDisplay = `${aircraft.name} ${icaoText ? `(${icaoText})` : ''}`;
               }
             }
@@ -232,7 +232,18 @@ export default function HomePage({ initialFilters, savedSearch }) {
             
             return (
               <tr key={key}>
-                {filters.group_by?.includes("carrier") && <td><dfn title={airlineCodes[route.carrier]}>{route.carrier}</dfn></td>}
+                {filters.group_by?.includes("carrier") && (
+                  <td>
+                    {(() => {
+                      const name = airlineCodes[route.carrier];
+                      const code = route.carrier;
+                      const format = formattingOptions.airlineLabelFormat || (formattingOptions.airlineIataOnly ? 'iata_only' : 'name_only');
+                      if (format === 'iata_only') return code;
+                      if (format === 'iata_name') return name ? `${code} - ${name}` : code;
+                      return name || code;
+                    })()}
+                  </td>
+                )}
                 {filters.group_by?.includes("aircraft_type") && <td>{aircraftDisplay}</td>}
                 {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
                 {filters.group_by?.includes("dest") && <td>{route.dest}</td>}

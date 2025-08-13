@@ -23,15 +23,32 @@ const FormattingTab = ({ formattingOptions, setFormattingOptions }) => {
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <label htmlFor="aircraftIcaoOnly" className="text-sm font-medium text-gray-700 pr-4">Show only aircraft ICAO code</label>
-        <input
-          type="checkbox"
-          id="aircraftIcaoOnly"
-          checked={!!formattingOptions.aircraftIcaoOnly}
-          onChange={() => handleCheckboxChange('aircraftIcaoOnly')}
-          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-        />
+      <div>
+        <label htmlFor="aircraftLabelFormat" className="block text-sm font-medium text-gray-700 mb-1">Aircraft label format</label>
+        <select
+          id="aircraftLabelFormat"
+          value={formattingOptions.aircraftLabelFormat || (formattingOptions.aircraftIcaoOnly ? 'icao_only' : 'name_icao')}
+          onChange={(e) => handleInputChange('aircraftLabelFormat', e.target.value)}
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        >
+          <option value="name_icao">Name + ICAO (e.g., Boeing 737-800 (B738))</option>
+          <option value="icao_only">ICAO only (e.g., B738)</option>
+          <option value="name_only">Name only (e.g., Boeing 737-800)</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="airlineLabelFormat" className="block text-sm font-medium text-gray-700 mb-1">Airline label format</label>
+        <select
+          id="airlineLabelFormat"
+          value={formattingOptions.airlineLabelFormat || (formattingOptions.airlineIataOnly ? 'iata_only' : 'name_only')}
+          onChange={(e) => handleInputChange('airlineLabelFormat', e.target.value)}
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        >
+          <option value="name_only">Name only (e.g., Delta Air Lines)</option>
+          <option value="iata_only">IATA only (e.g., DL)</option>
+          <option value="iata_name">IATA + Name (e.g., DL - Delta Air Lines)</option>
+        </select>
       </div>
 
       <div>
