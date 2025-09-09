@@ -398,6 +398,17 @@ module Scripts
       raise
     end
 
+    def delete_file_from_bucket(filename)
+      @s3_client.delete_object(
+        bucket: @bucket_name,
+        key: filename
+      )
+      puts "   ✅ Deleted from bucket: #{filename}"
+    rescue => e
+      puts "   ❌ Error deleting from bucket: #{e.message}"
+      raise
+    end
+
     def format_bytes(bytes)
       units = ['B', 'KB', 'MB', 'GB']
       size = bytes.to_f

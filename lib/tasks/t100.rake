@@ -1,7 +1,7 @@
 namespace :t100 do
   desc "Process T-100 ZIP files and upload to R2"
   task :process, [:bucket_name, :input_directory] => :environment do |t, args|
-    bucket_name = args[:bucket_name] || ENV['R2_BUCKET_NAME']
+    bucket_name = args[:bucket_name] || ENV['R2_BUCKET_NAME'] || 'airline-stats-t100-data'
     input_directory = args[:input_directory] || '.'
     
     unless bucket_name
