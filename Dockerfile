@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Base image for Ruby
-ARG RUBY_VERSION=3.4.5
+ARG RUBY_VERSION=3.4.7
 FROM ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
