@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.4.5"
+ruby "3.4.7"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem 'activerecord', "~> 8.0"
@@ -56,6 +56,7 @@ gem "csv"
 
 gem "rubyzip"
 gem "aws-sdk-s3" 
+gem "openssl", "~> 3.3.1"
 gem "ruby-progressbar"
 
 

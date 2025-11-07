@@ -218,9 +218,18 @@ module Scripts
           return nil
         end
 
-        csv_file_path = File.join(temp_dir, csv_entry.name)
-        csv_entry.extract(csv_file_path)
-        puts "   📂 Extracted: #{csv_entry.name}"
+        # Ensure we only write within our temp directory and avoid zip path tricks
+        csv_file_path = File.join(temp_dir, File.basename(csv_entry.name))
+        FileUtils.mkdir_p(File.dirname(csv_file_path))
+
+        # Use streaming to avoid rubyzip path normalization quirks on absolute paths
+        csv_entry.get_input_stream do |io|
+          File.open(csv_file_path, 'wb') do |f|
+            IO.copy_stream(io, f)
+          end
+        end
+
+        puts "   📂 Extracted: #{File.basename(csv_entry.name)}"
         return csv_file_path
       end
     rescue => e
