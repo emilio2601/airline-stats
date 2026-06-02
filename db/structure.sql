@@ -81,6 +81,7 @@ CREATE TABLE public.routes (
 CREATE MATERIALIZED VIEW public.route_summaries AS
  SELECT (date_trunc('month'::text, (month)::timestamp with time zone))::date AS month,
     carrier,
+    unique_carrier,
     origin,
     dest,
     origin_country,
@@ -94,7 +95,7 @@ CREATE MATERIALIZED VIEW public.route_summaries AS
     sum((seats * distance)) AS asms,
     sum((passengers * distance)) AS rpms
    FROM public.routes
-  GROUP BY (date_trunc('month'::text, (month)::timestamp with time zone)), carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class
+  GROUP BY (date_trunc('month'::text, (month)::timestamp with time zone)), carrier, unique_carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class
   WITH NO DATA;
 
 
@@ -266,7 +267,14 @@ CREATE INDEX idx_route_summaries_origin_dest_month ON public.route_summaries USI
 -- Name: idx_route_summaries_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING btree (month, carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class);
+CREATE UNIQUE INDEX idx_route_summaries_unique ON public.route_summaries USING btree (month, carrier, unique_carrier, origin, dest, origin_country, dest_country, aircraft_type, service_class);
+
+
+--
+-- Name: idx_route_summaries_unique_carrier; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_route_summaries_unique_carrier ON public.route_summaries USING btree (unique_carrier);
 
 
 --
@@ -290,6 +298,7 @@ CREATE UNIQUE INDEX index_saved_searches_on_shareable_id ON public.saved_searche
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260602120000'),
 ('20250807034137'),
 ('20250807034136'),
 ('20250807034135'),

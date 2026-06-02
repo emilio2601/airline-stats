@@ -16,6 +16,7 @@
 #  rpms                 :bigint
 #  seats                :bigint
 #  service_class        :string
+#  unique_carrier       :string
 #
 # Indexes
 #
@@ -27,7 +28,8 @@
 #  idx_route_summaries_dest_country_no_month  (dest_country,origin_country)
 #  idx_route_summaries_dest_origin_month      (dest,origin,month)
 #  idx_route_summaries_origin_dest_month      (origin,dest,month)
-#  idx_route_summaries_unique                 (month,carrier,origin,dest,origin_country,dest_country,aircraft_type,service_class) UNIQUE
+#  idx_route_summaries_unique                 (month,carrier,unique_carrier,origin,dest,origin_country,dest_country,aircraft_type,service_class) UNIQUE
+#  idx_route_summaries_unique_carrier         (unique_carrier)
 #
 class RouteSummary < ApplicationRecord
   self.table_name = "route_summaries"

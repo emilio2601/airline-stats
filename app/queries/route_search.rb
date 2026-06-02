@@ -116,6 +116,7 @@ class RouteSearch
   def group_expressions
     sanitized_group_by.map do |group|
       case group
+      when "carrier" then "unique_carrier"
       when "year" then "DATE_TRUNC('year', month)"
       when "quarter" then "DATE_TRUNC('quarter', month)"
       when "month" then "DATE_TRUNC('month', month)"
@@ -127,6 +128,9 @@ class RouteSearch
   def group_aliases
     sanitized_group_by.map do |group|
       case group
+      # Group/label by the disambiguated unique_carrier, but expose it under the
+      # existing "carrier" alias so the clean-code filter and frontend stay unchanged.
+      when "carrier" then "unique_carrier as carrier"
       when "year" then "DATE_TRUNC('year', month) as year"
       when "quarter" then "DATE_TRUNC('quarter', month) as quarter"
       when "month" then "DATE_TRUNC('month', month) as month"
@@ -154,8 +158,10 @@ class RouteSearch
       # Special case for the calculated load_factor
       "(SUM(passengers)::numeric / NULLIF(SUM(seats)::numeric, 0)) #{order_dir} NULLS LAST"
     else
-      # This must be a regular grouping column (e.g., carrier)
-      "#{order_by} #{order_dir}"
+      # This must be a regular grouping column. "carrier" grouping is actually
+      # done on unique_carrier, so order by that to match.
+      column = order_by == "carrier" ? "unique_carrier" : order_by
+      "#{column} #{order_dir}"
     end
   end
 
