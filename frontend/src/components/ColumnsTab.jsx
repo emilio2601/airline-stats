@@ -1,39 +1,34 @@
-import React from 'react';
-
-const columnHeaders = [
-  {key: "departures_performed", value: "Departures performed"},
-  {key: "seats", value: "Seats"},
-  {key: "asms", value: "ASMs", className: "hidden md:block"},
-  {key: "passengers", value: "Passengers"},
-  {key: "rpms", value: "RPMs", className: "hidden md:block"},
-  {key: "load_factor", value: "Load Factor"},
-]
+const columnOptions = [
+  { key: 'departures_performed', label: 'Departures' },
+  { key: 'seats', label: 'Seats' },
+  { key: 'asms', label: 'ASMs' },
+  { key: 'passengers', label: 'Passengers' },
+  { key: 'rpms', label: 'RPMs' },
+  { key: 'load_factor', label: 'Load factor' },
+];
 
 const ColumnsTab = ({ visibleColumns, setVisibleColumns }) => {
-
-  const handleCheckboxChange = (key) => {
-    setVisibleColumns(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+  const visibleCount = columnOptions.filter(({ key }) => visibleColumns[key]).length;
 
   return (
-    <div className="space-y-2">
-      {columnHeaders.map(col => (
-        <div key={col.key} className="flex flex-row space-x-2">
-          <input
-            type="checkbox"
-            id={`col-${col.key}`}
-            name={col.key}
-            checked={visibleColumns[col.key]}
-            onChange={() => handleCheckboxChange(col.key)}
-          />
-          <label htmlFor={`col-${col.key}`}>{col.value}</label>
-        </div>
-      ))}
+    <div className="dashboard-options">
+      <p className="dashboard-option-caption">Metrics</p>
+      <div className="dashboard-option-grid">
+        {columnOptions.map(({ key, label }) => (
+          <label key={key} className={`dashboard-option${visibleColumns[key] ? ' is-selected' : ''}`}>
+            <input
+              type="checkbox"
+              checked={Boolean(visibleColumns[key])}
+              disabled={visibleCount === 1 && Boolean(visibleColumns[key])}
+              onChange={() => setVisibleColumns((current) => ({ ...current, [key]: !current[key] }))}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </div>
+      <p className="dashboard-panel-hint">Choose which metrics appear in the table and CSV export. Keep at least one visible.</p>
     </div>
   );
 };
 
-export default ColumnsTab; 
+export default ColumnsTab;

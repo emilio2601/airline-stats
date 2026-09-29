@@ -18,10 +18,16 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
   useEffect(() => {
     setConfig({name: "Country", keys: ["origin_country", "dest_country", "bidirectional_country"]})
     
+    const hasAirportFilter = [filters.origin, filters.dest].some((value) =>
+      Array.isArray(value) ? value.length > 0 : Boolean(value)
+    );
+    const includesBothDirections = filters.bidirectional_country ||
+      (filters.bidirectional_airport && hasAirportFilter);
+
     let breakdownText = null;
-    if (filters.bidirectional_country) {
+    if (includesBothDirections) {
       if (filters.origin_country && filters.dest_country) {
-        breakdownText = `${filters.origin_country} <-> ${filters.dest_country}`;
+        breakdownText = `${filters.origin_country} ↔ ${filters.dest_country}`;
       } else if (filters.origin_country) {
         breakdownText = `To/From ${filters.origin_country}`;
       } else if (filters.dest_country) {
@@ -29,7 +35,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
       }
     } else {
       if (filters.origin_country && filters.dest_country) {
-        breakdownText = `${filters.origin_country} - ${filters.dest_country}`;
+        breakdownText = `${filters.origin_country} → ${filters.dest_country}`;
       } else if (filters.origin_country) {
         breakdownText = `From ${filters.origin_country}`;
       } else if (filters.dest_country) {
@@ -38,7 +44,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
     }
     setBreakdown(breakdownText);
 
-  }, [filters.origin_country, filters.dest_country, filters.bidirectional_country, setConfig, setBreakdown])
+  }, [filters.origin_country, filters.dest_country, filters.bidirectional_country, filters.bidirectional_airport, filters.origin, filters.dest, setConfig, setBreakdown])
 
   return (
     <>
@@ -59,4 +65,4 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
   )
 }
 
-export default CountryFilter; 
+export default CountryFilter;

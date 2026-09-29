@@ -1,86 +1,81 @@
-import React from 'react';
+import { formatNumber } from '../utils/numberFormat';
 
 const FormattingTab = ({ formattingOptions, setFormattingOptions }) => {
-
-  const handleCheckboxChange = (key) => {
-    setFormattingOptions(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleInputChange = (key, value) => {
-    setFormattingOptions(prev => ({ ...prev, [key]: value }));
-  };
+  const update = (key, value) => setFormattingOptions((current) => ({ ...current, [key]: value }));
+  const significantDigits = formattingOptions.significantDigits ?? 3;
+  const exampleOptions = { rounding: 'auto', significantDigits };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <label htmlFor="showPerFlightAverage" className="text-sm font-medium text-gray-700 pr-4">Show per-flight average</label>
+    <div className="dashboard-formatting-options">
+      <label className="dashboard-setting-toggle">
+        <span>
+          <strong>Per-flight averages</strong>
+          <small>Show averages beside total seats and passengers</small>
+        </span>
         <input
           type="checkbox"
-          id="showPerFlightAverage"
-          checked={formattingOptions.showPerFlightAverage}
-          onChange={() => handleCheckboxChange('showPerFlightAverage')}
-          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          checked={Boolean(formattingOptions.showPerFlightAverage)}
+          onChange={(event) => update('showPerFlightAverage', event.target.checked)}
         />
-      </div>
+      </label>
 
-      <div>
-        <label htmlFor="aircraftLabelFormat" className="block text-sm font-medium text-gray-700 mb-1">Aircraft label format</label>
-        <select
-          id="aircraftLabelFormat"
-          value={formattingOptions.aircraftLabelFormat || (formattingOptions.aircraftIcaoOnly ? 'icao_only' : 'name_icao')}
-          onChange={(e) => handleInputChange('aircraftLabelFormat', e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-        >
-          <option value="name_icao">Name + ICAO (e.g., Boeing 737-800 (B738))</option>
-          <option value="icao_only">ICAO only (e.g., B738)</option>
-          <option value="name_only">Name only (e.g., Boeing 737-800)</option>
-        </select>
+      <div className="dashboard-setting-grid">
+        <label className="dashboard-setting-field">
+          <span>Airline labels</span>
+          <select
+            value={formattingOptions.airlineLabelFormat || (formattingOptions.airlineIataOnly ? 'iata_only' : 'name_only')}
+            onChange={(event) => update('airlineLabelFormat', event.target.value)}
+          >
+            <option value="name_only">Name</option>
+            <option value="iata_only">Code</option>
+            <option value="iata_name">Code + name</option>
+          </select>
+        </label>
+        <label className="dashboard-setting-field">
+          <span>Aircraft labels</span>
+          <select
+            value={formattingOptions.aircraftLabelFormat || (formattingOptions.aircraftIcaoOnly ? 'icao_only' : 'name_icao')}
+            onChange={(event) => update('aircraftLabelFormat', event.target.value)}
+          >
+            <option value="name_icao">Name + ICAO</option>
+            <option value="icao_only">ICAO code</option>
+            <option value="name_only">Name</option>
+          </select>
+        </label>
+        <label className="dashboard-setting-field">
+          <span>Large numbers</span>
+          <select value={formattingOptions.rounding || 'none'} onChange={(event) => update('rounding', event.target.value)}>
+            <option value="none">Full values</option>
+            <option value="auto">Automatic K / M / B</option>
+            <option value="K">Thousands (K)</option>
+            <option value="M">Millions (M)</option>
+            <option value="B">Billions (B)</option>
+          </select>
+        </label>
+        <label className="dashboard-setting-field">
+          <span>Significant digits</span>
+          <select
+            value={significantDigits}
+            disabled={!formattingOptions.rounding || formattingOptions.rounding === 'none'}
+            onChange={(event) => update('significantDigits', Number(event.target.value))}
+          >
+            {[2, 3, 4, 5].map((digits) => <option key={digits} value={digits}>{digits} digits</option>)}
+          </select>
+        </label>
+        <label className="dashboard-setting-field">
+          <span>Load factor decimals</span>
+          <input
+            type="number"
+            min="0"
+            max="10"
+            value={formattingOptions.decimalPrecision ?? 0}
+            onChange={(event) => update('decimalPrecision', Math.min(10, Math.max(0, Number(event.target.value) || 0)))}
+          />
+        </label>
       </div>
-
-      <div>
-        <label htmlFor="airlineLabelFormat" className="block text-sm font-medium text-gray-700 mb-1">Airline label format</label>
-        <select
-          id="airlineLabelFormat"
-          value={formattingOptions.airlineLabelFormat || (formattingOptions.airlineIataOnly ? 'iata_only' : 'name_only')}
-          onChange={(e) => handleInputChange('airlineLabelFormat', e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-        >
-          <option value="name_only">Name only (e.g., Delta Air Lines)</option>
-          <option value="iata_only">IATA only (e.g., DL)</option>
-          <option value="iata_name">IATA + Name (e.g., DL - Delta Air Lines)</option>
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="rounding" className="block text-sm font-medium text-gray-700 mb-1">Round large numbers</label>
-        <select
-          id="rounding"
-          value={formattingOptions.rounding}
-          onChange={(e) => handleInputChange('rounding', e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-        >
-          <option value="none">None</option>
-          <option value="auto">Automatic (K/M/B)</option>
-          <option value="K">Thousands (K)</option>
-          <option value="M">Millions (M)</option>
-          <option value="B">Billions (B)</option>
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="decimalPrecision" className="block text-sm font-medium text-gray-700 mb-1">Decimal Precision</label>
-        <input
-          type="number"
-          id="decimalPrecision"
-          value={formattingOptions.decimalPrecision}
-          onChange={(e) => handleInputChange('decimalPrecision', parseInt(e.target.value, 10))}
-          className="mt-1 block w-full pl-3 pr-1 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-          min="0"
-          max="10"
-        />
-      </div>
+      <p className="dashboard-panel-hint">At {significantDigits} digits: 2,886,265 → {formatNumber(2_886_265, exampleOptions)}; 900,068 → {formatNumber(900_068, exampleOptions)}. Preferences are saved in this browser.</p>
     </div>
   );
 };
 
-export default FormattingTab; 
+export default FormattingTab;

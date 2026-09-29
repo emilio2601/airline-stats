@@ -14,7 +14,7 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig, fil
   useEffect(() => {
     setConfig({name: "Aircraft Type", keys: ["aircraft_type"]});
     if (filters.aircraft_type) {
-      const aircraft = aircraftCodes.find(ac => ac.code === filters.aircraft_type);
+      const aircraft = aircraftCodes.find(ac => ac.code === String(filters.aircraft_type));
       const matchingIcao = aircraft?.icao.find(code => code === aircraftIcao.toUpperCase()) || aircraft?.icao[0];
       setBreakdown(matchingIcao || filters.aircraft_type);
     } else {
@@ -31,4 +31,4 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig, fil
   )
 }
 
-export default AircraftFilter; 
+export default AircraftFilter;

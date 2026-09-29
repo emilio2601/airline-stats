@@ -15,9 +15,9 @@ const groupingHeaders = [
 const columnHeaders = [
   {key: "departures_performed", value: "Departures performed"},
   {key: "seats", value: "Seats (per flight)"},
-  {key: "asms", value: "ASMs", className: "hidden md:block"},
+  {key: "asms", value: "ASMs", className: "hidden md:table-cell"},
   {key: "passengers", value: "Passengers (per flight)"},
-  {key: "rpms", value: "RPMs", className: "hidden md:block"},
+  {key: "rpms", value: "RPMs", className: "hidden md:table-cell"},
   {key: "load_factor", value: "Load Factor"},
 ]
 
@@ -33,10 +33,12 @@ const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }
   return (
     <tr>
       {groupingHeaders.filter((col) => filters.group_by?.includes(col.key)).map((col, i) => (
-        <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
-          {col.value}
-          {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
-          {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
+        <th key={i} scope="col" className={col.className} aria-sort={col.key === filters.order_by ? (filters.order_dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+          <button type="button" className="dashboard-sort-button" onClick={() => addSortToFilter(col)}>
+            {col.value}
+            {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1" aria-hidden="true"></i>}
+            {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1" aria-hidden="true"></i>}
+          </button>
         </th>
       ))}
       {columnHeaders.filter(col => visibleColumns[col.key]).map((col, i) => {
@@ -45,10 +47,12 @@ const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }
           value = value.replace(" (per flight)", "");
         }
         return (
-          <th key={i} onClick={() => addSortToFilter(col)} className={`cursor-pointer align-text-top ${col.className}`}>
-            {value}
-            {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1"></i>}
-            {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1"></i>}
+          <th key={i} scope="col" className={col.className} aria-sort={col.key === filters.order_by ? (filters.order_dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+            <button type="button" className="dashboard-sort-button" onClick={() => addSortToFilter(col)}>
+              {value}
+              {col.key == filters.order_by && filters.order_dir == "desc" && <i className="fa fa-chevron-down scale-75 pl-1" aria-hidden="true"></i>}
+              {col.key == filters.order_by && filters.order_dir == "asc" && <i className="fa fa-chevron-up scale-75 pl-1" aria-hidden="true"></i>}
+            </button>
           </th>
         )
       })}
@@ -56,4 +60,4 @@ const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }
   )
 }
 
-export default TableHeader; 
+export default TableHeader;

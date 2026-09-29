@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters }) => {
-  const [airlines, setAirlines] = useState(filters.carrier || [])
+  const carrierList = (value) => Array.isArray(value) ? value : value ? [value] : [];
+  const [airlines, setAirlines] = useState(carrierList(filters.carrier))
   const [inputAirline, setInputAirline] = useState("")
 
   const applyFilter = () => {
@@ -19,12 +20,14 @@ const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   useEffect(() => {
     setConfig({name: "Airline", keys: ["carrier"]});
-    if (filters.carrier && filters.carrier.length > 0) {
-      setBreakdown(filters.carrier.join(", "))
+    const currentCarriers = carrierList(filters.carrier);
+    if (currentCarriers.length > 0) {
+      const visibleCarriers = currentCarriers.slice(0, 2).join(', ');
+      setBreakdown(visibleCarriers + (currentCarriers.length > 2 ? ` +${currentCarriers.length - 2}` : ''))
     } else {
       setBreakdown(null)
     }
-    setAirlines(filters.carrier || [])
+    setAirlines(currentCarriers)
   }, [filters.carrier, setConfig, setBreakdown])
 
   return (
@@ -46,4 +49,4 @@ const AirlineFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
   )
 }
 
-export default AirlineFilter; 
+export default AirlineFilter;

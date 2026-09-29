@@ -1,101 +1,57 @@
-import React, { useState, useEffect } from 'react';
-
-const groupingHeaders = [
-  {key: "carrier", value: "Airline"},
-  {key: "aircraft_type", value: "Aircraft Type"},
-  {key: "origin", value: "Origin"},
-  {key: "dest", value: "Destination"},
-  {key: "origin_country", value: "Origin Country"},
-  {key: "dest_country", value: "Destination Country"},
-  {key: "month", value: "Month"},
-  {key: "quarter", value: "Quarter"},
-  {key: "year", value: "Year"},
-]
+const groupingSections = [
+  {
+    title: 'Route',
+    options: [
+      { key: 'carrier', label: 'Airline' },
+      { key: 'aircraft_type', label: 'Aircraft type' },
+      { key: 'origin', label: 'Origin airport' },
+      { key: 'dest', label: 'Destination airport' },
+      { key: 'origin_country', label: 'Origin country' },
+      { key: 'dest_country', label: 'Destination country' },
+    ],
+  },
+  {
+    title: 'Time',
+    options: [
+      { key: 'year', label: 'Year' },
+      { key: 'quarter', label: 'Quarter' },
+      { key: 'month', label: 'Month' },
+    ],
+  },
+];
 
 const GroupingTab = ({ setFilters, filters }) => {
-  const [byAirline, setByAirline] = useState(filters.group_by?.includes("carrier") || false)
-  const [byAircraft, setByAircraft] = useState(filters.group_by?.includes("aircraft_type") || false)
-  const [byOriginAirport, setByOriginAirport] = useState(filters.group_by?.includes("origin") || false)
-  const [byDestAirport, setByDestAirport] = useState(filters.group_by?.includes("dest") || false)
-  const [byOriginCountry, setByOriginCountry] = useState(filters.group_by?.includes("origin_country") || false)
-  const [byDestCountry, setByDestCountry] = useState(filters.group_by?.includes("dest_country") || false)
-  const [byYear, setByYear] = useState(filters.group_by?.includes("year") || false)
-  const [byQuarter, setByQuarter] = useState(filters.group_by?.includes("quarter") || false)
-  const [byMonth, setByMonth] = useState(filters.group_by?.includes("month") || false)
+  const selected = Array.isArray(filters.group_by) ? filters.group_by : [];
 
-  const applyFilter = () => {
-    const groupBy = []
-
-    if (byAirline) groupBy.push("carrier");
-    if (byAircraft) groupBy.push("aircraft_type");
-    if (byOriginAirport) groupBy.push("origin");
-    if (byDestAirport) groupBy.push("dest");
-    if (byOriginCountry) groupBy.push("origin_country");
-    if (byDestCountry) groupBy.push("dest_country");
-    if (byYear) groupBy.push("year");
-    if (byQuarter) groupBy.push("quarter");
-    if (byMonth) groupBy.push("month");
-
-    setFilters((f) => ({ ...f, group_by: groupBy}))
-  }
-
-  useEffect(() => {
-    const currentGroups = filters.group_by || [];
-    setByAirline(currentGroups.includes("carrier"));
-    setByAircraft(currentGroups.includes("aircraft_type"));
-    setByOriginAirport(currentGroups.includes("origin"));
-    setByDestAirport(currentGroups.includes("dest"));
-    setByOriginCountry(currentGroups.includes("origin_country"));
-    setByDestCountry(currentGroups.includes("dest_country"));
-    setByYear(currentGroups.includes("year"));
-    setByQuarter(currentGroups.includes("quarter"));
-    setByMonth(currentGroups.includes("month"));
-  }, [filters.group_by])
+  const toggle = (key) => {
+    setFilters((current) => {
+      const groups = Array.isArray(current.group_by) ? current.group_by : [];
+      return {
+        ...current,
+        group_by: groups.includes(key) ? groups.filter((group) => group !== key) : [...groups, key],
+        page: 1,
+      };
+    });
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="airline" name="airline" value="airline" checked={byAirline} onChange={(e) => setByAirline(!byAirline)}/>
-          <label htmlFor="airline">Airline</label>
+    <div className="dashboard-options">
+      {groupingSections.map((section) => (
+        <div className="dashboard-option-section" key={section.title}>
+          <p className="dashboard-option-caption">{section.title}</p>
+          <div className="dashboard-option-grid">
+            {section.options.map(({ key, label }) => (
+              <label key={key} className={`dashboard-option${selected.includes(key) ? ' is-selected' : ''}`}>
+                <input type="checkbox" checked={selected.includes(key)} onChange={() => toggle(key)} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="aircraft_type" name="aircraft_type" value="aircraft_type" checked={byAircraft} onChange={(e) => setByAircraft(!byAircraft)}/>
-          <label htmlFor="aircraft_type">Aircraft type</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="origin" name="origin" value="origin" checked={byOriginAirport} onChange={(e) => setByOriginAirport(!byOriginAirport)}/>
-          <label htmlFor="origin">Origin airport</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="dest" name="dest" value="dest" checked={byDestAirport} onChange={(e) => setByDestAirport(!byDestAirport)}/>
-          <label htmlFor="dest">Destination airport</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="origin_country" name="origin_country" value="origin_country" checked={byOriginCountry} onChange={(e) => setByOriginCountry(!byOriginCountry)}/>
-          <label htmlFor="origin_country">Origin country</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="dest_country" name="dest_country" value="dest_country" checked={byDestCountry} onChange={(e) => setByDestCountry(!byDestCountry)}/>
-          <label htmlFor="dest_country">Destination country</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="year" name="year" value="year" checked={byYear} onChange={(e) => setByYear(!byYear)}/>
-          <label htmlFor="year">Year</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="quarter" name="quarter" value="quarter" checked={byQuarter} onChange={(e) => setByQuarter(!byQuarter)}/>
-          <label htmlFor="quarter">Quarter</label>
-        </div>
-        <div className="flex flex-row space-x-2">
-          <input type="checkbox" id="month" name="month" value="month" checked={byMonth} onChange={(e) => setByMonth(!byMonth)}/>
-          <label htmlFor="month">Month</label>
-        </div>
-      </div>
-
-      <button className='bg-green-500 p-2 text-white rounded-md w-full' onClick={applyFilter}>Apply Grouping</button>
+      ))}
+      <p className="dashboard-panel-hint">The table updates as you select groups.</p>
     </div>
-  )
-}
+  );
+};
 
-export default GroupingTab; 
+export default GroupingTab;

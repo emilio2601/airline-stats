@@ -44,6 +44,7 @@ const ShareTab = ({ filters }) => {
       const shareableId = response.data.shareable_id;
       const link = `${window.location.origin}/s/${shareableId}`;
       setShareableLink(link);
+      fetchSearches();
     } catch (error) {
       console.error("Error saving search:", error);
       alert("Could not save search. Please try again.");
@@ -95,7 +96,7 @@ const ShareTab = ({ filters }) => {
 
       {showSaveModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-gray-900 w-1/3">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-gray-900 w-[min(28rem,calc(100vw-2rem))]">
             <h2 className="text-xl font-bold mb-4">{shareableLink ? "Search Saved!" : "Save Your Search"}</h2>
             
             {shareableLink ? (
@@ -145,7 +146,7 @@ const ShareTab = ({ filters }) => {
                   </button>
                   <button
                     onClick={handleSaveSearch}
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                    className="bg-[#635bff] text-white px-4 py-2 rounded-md hover:bg-[#5148ed]"
                   >
                     Save
                   </button>

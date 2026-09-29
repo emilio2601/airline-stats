@@ -1,65 +1,67 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 import { aircraftCodes } from '../data/aircraft_codes';
 import { airlineCodes } from '../data/airline_codes';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { formatNumber } from '../utils/numberFormat';
 import PagingButton from '../components/PagingButton';
 import TableHeader from '../components/TableHeader';
 import AirportFilter from '../components/filters/AirportFilter';
 import CountryFilter from '../components/filters/CountryFilter';
 import DateFilter from '../components/filters/DateFilter';
+import AirlineFilter from '../components/filters/AirlineFilter';
+import AircraftFilter from '../components/filters/AircraftFilter';
+import ClassFilter from '../components/filters/ClassFilter';
 import BaseFilter from '../components/BaseFilter';
-import ViewSettings from '../components/ViewSettings';
+import GroupingTab from '../components/GroupingTab';
+import ColumnsTab from '../components/ColumnsTab';
+import FormattingTab from '../components/FormattingTab';
 import Actions from '../components/Actions';
-import MoreFilters from '../components/MoreFilters';
+import '../dashboard.css';
 
-const quarterMap = {
-  "01": "Q1",
-  "04": "Q2",
-  "07": "Q3",
-  "10": "Q4"
-}
-
-const groupingHeaders = [
-  {key: "carrier", value: "Airline"},
-  {key: "aircraft_type", value: "Aircraft Type"},
-  {key: "origin", value: "Origin"},
-  {key: "dest", value: "Destination"},
-  {key: "origin_country", value: "Origin Country"},
-  {key: "dest_country", value: "Destination Country"},
-  {key: "month", value: "Month"},
-  {key: "quarter", value: "Quarter"},
-  {key: "year", value: "Year"},
-]
-
-const columnHeaders = [
-  {key: "departures_performed", value: "Departures performed"},
-  {key: "seats", value: "Seats (per flight)"},
-  {key: "asms", value: "ASMs", className: "hidden md:block"},
-  {key: "passengers", value: "Passengers (per flight)"},
-  {key: "rpms", value: "RPMs", className: "hidden md:block"},
-  {key: "load_factor", value: "Load Factor"},
-]
+const quarterMap = { '01': 'Q1', '04': 'Q2', '07': 'Q3', '10': 'Q4' };
+const groupLabels = {
+  carrier: 'Airline',
+  aircraft_type: 'Aircraft',
+  origin: 'Origin',
+  dest: 'Destination',
+  origin_country: 'Origin country',
+  dest_country: 'Destination country',
+  month: 'Month',
+  quarter: 'Quarter',
+  year: 'Year',
+};
+const columnKeys = ['departures_performed', 'seats', 'asms', 'passengers', 'rpms', 'load_factor'];
+const defaultFilters = {
+  page: 1,
+  items_per_page: 20,
+  order_by: 'seats',
+  order_dir: 'desc',
+  group_by: ['carrier'],
+  origin_country: 'US',
+  dest_country: 'GB',
+  from_date: '2023-01-01',
+};
 
 export default function HomePage({ initialFilters, savedSearch }) {
-  const defaultFilters = {page: 1, items_per_page: 20, order_by: "seats", order_dir: "desc", group_by: ["carrier"], origin_country: "US", dest_country: "GB", from_date: "2023-01-01"};
-
   const [data, setData] = useState({});
   const [dateRange, setDateRange] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState(initialFilters || defaultFilters);
-  const [isSavedSearchView, setIsSavedSearchView] = useState(!!savedSearch);
-  
+  const [fetchError, setFetchError] = useState('');
+  const [filters, setFilters] = useState(() => initialFilters || defaultFilters);
+  const [isSavedSearchView, setIsSavedSearchView] = useState(Boolean(savedSearch));
+  const [viewPanel, setViewPanel] = useState(null);
+  const viewHeaderRef = useRef(null);
   const [visibleColumns, setVisibleColumns] = useLocalStorage(
     'visibleColumns',
-    columnHeaders.reduce((acc, col) => ({ ...acc, [col.key]: true }), {})
+    columnKeys.reduce((result, key) => ({ ...result, [key]: true }), {})
   );
-
   const [formattingOptions, setFormattingOptions] = useLocalStorage('formattingOptions', {
     showPerFlightAverage: true,
     rounding: 'none',
+    significantDigits: 3,
     decimalPrecision: 0,
     aircraftIcaoOnly: false,
     airlineIataOnly: false,
@@ -68,219 +70,225 @@ export default function HomePage({ initialFilters, savedSearch }) {
   });
 
   const handleFilterChange = (newFilters) => {
-    // This is a data-consistency guard. It ensures that if we are sorting by a
-    // column, that column must be part of the 'group by' clause. If it's not,
-    // we reset the sort to a default value to prevent an invalid API request.
-    const resolvedFilters = typeof newFilters === 'function' ? newFilters(filters) : newFilters;
-    
-    let correctedFilters = { ...resolvedFilters };
-    if (groupingHeaders.map((col) => col.key).includes(correctedFilters.order_by) && !correctedFilters.group_by?.includes(correctedFilters.order_by)) {
-      correctedFilters = { ...correctedFilters, order_by: "seats", order_dir: "desc" };
-    }
-    
-    // If we were viewing a saved search, this indicates the user is now modifying it.
-    if (isSavedSearchView) {
-      setIsSavedSearchView(false);
-    }
-
-    setFilters(correctedFilters);
-  };
-
-  const baseURL = "/api";
-
-  const fetchRoutes = async (controller) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${baseURL}/routes`, {
-        params: filters,
-        signal: controller.signal,
-      });
-      setData(response.data);
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        console.log("Request canceled:", error.message);
-      } else {
-        console.error("Error fetching data:", error);
+    if (isSavedSearchView) setIsSavedSearchView(false);
+    setFilters((current) => {
+      const resolved = typeof newFilters === 'function' ? newFilters(current) : newFilters;
+      const corrected = { ...resolved };
+      if (groupLabels[corrected.order_by] && !corrected.group_by?.includes(corrected.order_by)) {
+        corrected.order_by = 'seats';
+        corrected.order_dir = 'desc';
       }
-    } finally {
-      setIsLoading(false);
-    }
+      const changedFilter = Object.keys({ ...current, ...corrected })
+        .some((key) => key !== 'page' && current[key] !== corrected[key]);
+      if (changedFilter) corrected.page = 1;
+      return corrected;
+    });
   };
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchRoutes(controller);
-
-    return () => {
-      controller.abort();
-    };
+    setIsLoading(true);
+    setFetchError('');
+    axios.get('/api/routes', { params: filters, signal: controller.signal })
+      .then((response) => setData(response.data))
+      .catch((error) => {
+        if (!axios.isCancel(error)) {
+          console.error('Error fetching routes:', error);
+          setFetchError('Routes could not be loaded. Please try again.');
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
   }, [filters]);
 
   useEffect(() => {
-    const fetchDateRange = async () => {
-      const res = await axios.get(`${baseURL}/routes/date_range`)
-      setDateRange(res.data)
-    }
-    fetchDateRange();
-  }, [])
+    axios.get('/api/routes/date_range')
+      .then((response) => setDateRange(response.data))
+      .catch((error) => console.error('Error loading date range:', error));
+  }, []);
 
-  const formatNumber = (number) => {
-    const precision = formattingOptions.decimalPrecision;
-    const numberFormatOptions = {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
+  useEffect(() => {
+    if (!viewPanel) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (!viewHeaderRef.current?.contains(event.target)) setViewPanel(null);
     };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setViewPanel(null);
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [viewPanel]);
 
-    if (formattingOptions.rounding === 'auto') {
-        if (number >= 1_000_000_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000_000_000) + 'B';
-        if (number >= 1_000_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000_000) + 'M';
-        if (number >= 1_000) return Intl.NumberFormat(undefined, numberFormatOptions).format(number / 1_000) + 'K';
-    }
-    if (formattingOptions.rounding === 'B' && number >= 1_000_000_000) {
-      const value = number / 1_000_000_000;
-      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'B';
-    }
-    if (formattingOptions.rounding === 'M' && number >= 1_000_000) {
-      const value = number / 1_000_000;
-      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'M';
-    }
-    if (formattingOptions.rounding === 'K' && number >= 1_000) {
-      const value = number / 1_000;
-      return Intl.NumberFormat(undefined, numberFormatOptions).format(value) + 'K';
-    }
-    return Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(number);
+  const formatMetric = (number) => formatNumber(number, formattingOptions);
+
+  const formatLoadFactor = (value) => {
+    if (value == null) return '—';
+    return Intl.NumberFormat(undefined, {
+      minimumFractionDigits: formattingOptions.decimalPrecision || 0,
+      maximumFractionDigits: formattingOptions.decimalPrecision || 0,
+    }).format(value * 100) + '%';
   };
 
-  const getFormattedLoadFactor = (lf) => {
-    const value = lf * 100;
-    return Intl.NumberFormat(undefined, {
-      minimumFractionDigits: formattingOptions.decimalPrecision,
-      maximumFractionDigits: formattingOptions.decimalPrecision,
-    }).format(value) + '%';
-  }
+  const aircraftLabel = (route) => {
+    const aircraft = aircraftCodes.find((item) => item.code === String(route.aircraft_type));
+    if (!aircraft) return route.aircraft_type;
+    const icao = Array.isArray(aircraft.icao) ? aircraft.icao.join(', ') : aircraft.icao;
+    const format = formattingOptions.aircraftLabelFormat || 'name_icao';
+    if (format === 'icao_only') return icao || aircraft.name;
+    if (format === 'name_only') return aircraft.name;
+    return aircraft.name + (icao ? ' (' + icao + ')' : '');
+  };
 
-  const handleItemsPerPageChange = (e) => {
-    handleFilterChange({...filters, page: 1, items_per_page: e.target.value})
-  }
-
-  const previousPage = () => {
-    handleFilterChange({...filters, page: filters.page - 1})
-  }
-
-  const nextPage = () => {
-    handleFilterChange({...filters, page: filters.page + 1})
-  }
+  const airlineLabel = (code) => {
+    const name = airlineCodes[code];
+    const format = formattingOptions.airlineLabelFormat || 'name_only';
+    if (format === 'iata_only') return code;
+    if (format === 'iata_name') return name ? code + ' - ' + name : code;
+    return name || code;
+  };
 
   const handleExport = () => {
-    const visibleColumnKeys = Object.keys(visibleColumns).filter(key => visibleColumns[key]);
+    const visibleColumnKeys = Object.keys(visibleColumns).filter((key) => visibleColumns[key]);
     const exportFilters = { ...filters, visible_columns: visibleColumnKeys, per_flight: formattingOptions.showPerFlightAverage };
-
-    const csvUrl = axios.getUri({
-      url: `${baseURL}/routes.csv`,
-      params: exportFilters,
-    });
-    
-    window.open(csvUrl, '_blank');
+    window.open(axios.getUri({ url: '/api/routes.csv', params: exportFilters }), '_blank');
   };
 
-  return (
-    <main className="flex min-h-screen flex-col items-center p-12 lg:p-24 space-y-4 max-w-max mx-auto">
-      {isSavedSearchView && savedSearch && (
-        <div className="w-full bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg relative" role="alert">
-          <strong className="font-bold">Viewing Saved Search</strong>
-          {savedSearch.search_name && <span className="block sm:inline">: {savedSearch.search_name}</span>}
-        </div>
-      )}
-      <div className={`flex flex-row flex-wrap gap-4 justify-center transition-opacity ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-        <BaseFilter setFilters={handleFilterChange} filters={filters} component={AirportFilter} />
-        <BaseFilter setFilters={handleFilterChange} filters={filters} component={CountryFilter} />
-        <BaseFilter setFilters={handleFilterChange} filters={filters} component={DateFilter} />
-        <MoreFilters filters={filters} setFilters={handleFilterChange} />
-        <ViewSettings 
-          filters={filters} 
-          setFilters={handleFilterChange} 
-          visibleColumns={visibleColumns} 
-          setVisibleColumns={setVisibleColumns} 
-          formattingOptions={formattingOptions}
-          setFormattingOptions={setFormattingOptions}
-        />
-        <Actions filters={filters} onExport={handleExport} />
-      </div>
+  const toggleViewPanel = (name) => setViewPanel((current) => current === name ? null : name);
+  const viewButton = (name, label, detail) => (
+    <button type="button" className={'dashboard-view-button' + (viewPanel === name ? ' active' : '')} onClick={() => toggleViewPanel(name)} aria-expanded={viewPanel === name} aria-controls="dashboard-view-panel">
+      <span>{label}</span>
+      {detail && <span className="dashboard-view-detail">{detail}</span>}
+      <i className={`fa fa-chevron-${viewPanel === name ? 'up' : 'down'}`} aria-hidden="true" />
+    </button>
+  );
+  const groupingSummary = (filters.group_by || []).map((key) => groupLabels[key] || key).join(', ') || 'None';
+  const visibleColumnCount = columnKeys.filter((key) => visibleColumns[key]).length;
+  const resultCount = data.total_items ?? 0;
+  const totalPages = data.total_pages || 1;
+  const currentPage = Number(filters.page) || 1;
 
-      <table className={`border-spacing-2 px-2 text-center border border-separate border-white w-full transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
-        <thead>
-          <TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} />
-        </thead>
-        <tbody>
-          {data.routes && data.routes.map((route, idx) => {
-            const aircraft = route.aircraft_type ? aircraftCodes.find(a => a.code == route.aircraft_type) : null;
-            let aircraftDisplay = route.aircraft_type;
-            if (aircraft) {
-              const icaoText = aircraft.icao ? (Array.isArray(aircraft.icao) ? aircraft.icao.join(', ') : aircraft.icao) : '';
-              const format = formattingOptions.aircraftLabelFormat || (formattingOptions.aircraftIcaoOnly ? 'icao_only' : 'name_icao');
-              if (format === 'icao_only') {
-                aircraftDisplay = icaoText || aircraft.name;
-              } else if (format === 'name_only') {
-                aircraftDisplay = aircraft.name;
-              } else {
-                aircraftDisplay = `${aircraft.name} ${icaoText ? `(${icaoText})` : ''}`;
-              }
-            }
-            
-            const keyBase = filters.group_by.map(col => (route[col] ?? '')).join('-');
-            const key = `${keyBase}-${idx}`;
-            
-            return (
-              <tr key={key}>
-                {filters.group_by?.includes("carrier") && (
-                  <td>
-                    {(() => {
-                      const name = airlineCodes[route.carrier];
-                      const code = route.carrier;
-                      const format = formattingOptions.airlineLabelFormat || (formattingOptions.airlineIataOnly ? 'iata_only' : 'name_only');
-                      if (format === 'iata_only') return code;
-                      if (format === 'iata_name') return name ? `${code} - ${name}` : code;
-                      return name || code;
-                    })()}
-                  </td>
-                )}
-                {filters.group_by?.includes("aircraft_type") && <td>{aircraftDisplay}</td>}
-                {filters.group_by?.includes("origin") && <td>{route.origin}</td>}
-                {filters.group_by?.includes("dest") && <td>{route.dest}</td>}
-                {filters.group_by?.includes("origin_country") && <td>{route.origin_country}</td>}
-                {filters.group_by?.includes("dest_country") && <td>{route.dest_country}</td>}
-                {filters.group_by?.includes("month") && <td>{route.month?.substring(0, 7)}</td>}
-                {filters.group_by?.includes("quarter") && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
-                {filters.group_by?.includes("year") && <td>{route.year?.substring(0, 4)}</td>}
-                {visibleColumns.departures_performed && <td>{formatNumber(route.departures_performed)}</td>}
-                {visibleColumns.seats && <td>{formatNumber(route.seats)} {formattingOptions.showPerFlightAverage && route.seats_per_flight != null && `(${formatNumber(route.seats_per_flight)})`}</td>}
-                {visibleColumns.asms && <td className="hidden md:block">{formatNumber(route.asms)}</td>}
-                {visibleColumns.passengers && <td>{formatNumber(route.passengers)} {formattingOptions.showPerFlightAverage && route.passengers_per_flight != null && `(${formatNumber(route.passengers_per_flight)})`}</td>}
-                {visibleColumns.rpms && <td className="hidden md:block">{formatNumber(route.rpms)}</td>}
-                {visibleColumns.load_factor && <td>{getFormattedLoadFactor(route.load_factor)}</td>}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-      <div className="flex w-full justify-between items-center">
-        <select value={filters.items_per_page} onChange={handleItemsPerPageChange} className="w-36 text-sm m-0 text-white p-2 pr-6 rounded-md border-r-4 border-transparent outline outline-gray-300 hover:outline-gray-100 bg-transparent cursor-pointer">
-            <option value="20">20 per page</option>
-            <option value="40">40 per page</option>
-            <option value="60">60 per page</option>
-            <option value="80">80 per page</option>
-        </select>
-        <div className="text-center text-sm">
-          <p>Page {filters.page} of {data.total_pages}</p>
-          <p>{data.total_items} total results</p>
-          {dateRange.from_date && <p className="text-[10px] mt-2">Data available to query: {dayjs(dateRange.from_date).format("MMM YYYY")} to {dayjs(dateRange.to_date).format("MMM YYYY")}</p>}
-          <p className="text-[10px]">Contact <a href="mailto:info@airlinestats.io" className="text-blue-500">info@airlinestats.io</a> for any questions or feedback</p>
+  return (
+    <div className="dashboard-app">
+      <header className="dashboard-topbar">
+        <div className="dashboard-topbar-inner">
+          <a className="dashboard-brand" href="/"><span className="dashboard-mark">a</span> airline stats</a>
+          <nav className="dashboard-nav" aria-label="Main navigation"><span className="dashboard-nav-current">Explore</span></nav>
+          {dateRange.to_date && <span className="dashboard-data-status">T-100 data through {dayjs(dateRange.to_date).format('MMM YYYY')}</span>}
         </div>
-        <div className="space-x-4">
-          <PagingButton disabled={filters.page == 1} onClick={previousPage}>Previous</PagingButton>
-          <PagingButton disabled={filters.page == data.total_pages} onClick={nextPage}>Next</PagingButton>
+      </header>
+
+      <main className="dashboard-main">
+        <div className="dashboard-page-heading">
+          <div><h1>Route explorer</h1><p>Explore monthly traffic by airline, airport, and route.</p></div>
+          <div className="dashboard-page-actions">
+            <Actions filters={filters} />
+            <button type="button" className="dashboard-button dashboard-button-primary" onClick={handleExport} disabled={visibleColumnCount === 0}>
+              <i className="fa fa-download" aria-hidden="true" /> Export CSV
+            </button>
+          </div>
         </div>
-      </div>
-     </main>
-  )
-} 
+
+        {isSavedSearchView && savedSearch && (
+          <div className="dashboard-saved-banner">Viewing saved search{savedSearch.search_name ? ': ' + savedSearch.search_name : ''}. Change a filter to create a new view.</div>
+        )}
+
+        <section className="dashboard-filter-panel" aria-label="Route filters">
+          <AirportFilter filters={filters} setFilters={handleFilterChange} />
+          <div className="dashboard-secondary-row">
+            <div className="dashboard-secondary-filters">
+              <BaseFilter setFilters={handleFilterChange} filters={filters} component={CountryFilter} />
+              <BaseFilter setFilters={handleFilterChange} filters={filters} component={DateFilter} componentProps={{ latestAvailableMonth: dateRange.to_date }} />
+              <BaseFilter setFilters={handleFilterChange} filters={filters} component={AirlineFilter} />
+              <BaseFilter setFilters={handleFilterChange} filters={filters} component={AircraftFilter} />
+              <BaseFilter setFilters={handleFilterChange} filters={filters} component={ClassFilter} />
+            </div>
+          </div>
+        </section>
+
+        <section className="dashboard-results" aria-label="Route results">
+          <div className="dashboard-table-card" aria-busy={isLoading}>
+            <div className="dashboard-results-header" ref={viewHeaderRef}>
+              <div className="dashboard-results-title">
+                <h2>Traffic results</h2>
+                <span>{resultCount.toLocaleString()} rows</span>
+              </div>
+              <div className="dashboard-result-tools" aria-label="Table view controls">
+                {viewButton('grouping', 'Group by', groupingSummary)}
+                {viewButton('columns', 'Columns', `${visibleColumnCount}/${columnKeys.length}`)}
+                {viewButton('formatting', 'Display')}
+              </div>
+              {viewPanel && (
+                <div id="dashboard-view-panel" className={`dashboard-view-panel dashboard-view-panel-${viewPanel}`} role="dialog" aria-label={viewPanel === 'grouping' ? 'Group rows by' : viewPanel === 'columns' ? 'Visible columns' : 'Display settings'}>
+                  <div className="dashboard-view-panel-heading">
+                    <div>
+                      <h3>{viewPanel === 'grouping' ? 'Group rows by' : viewPanel === 'columns' ? 'Visible columns' : 'Display settings'}</h3>
+                      <p>{viewPanel === 'grouping' ? 'Choose the dimensions for each row.' : viewPanel === 'columns' ? 'Show the metrics you need.' : 'Adjust how values and labels appear.'}</p>
+                    </div>
+                    <button type="button" className="dashboard-panel-close" onClick={() => setViewPanel(null)} aria-label="Close view settings">×</button>
+                  </div>
+                  {viewPanel === 'grouping' && <GroupingTab filters={filters} setFilters={handleFilterChange} />}
+                  {viewPanel === 'columns' && <ColumnsTab visibleColumns={visibleColumns} setVisibleColumns={setVisibleColumns} />}
+                  {viewPanel === 'formatting' && <FormattingTab formattingOptions={formattingOptions} setFormattingOptions={setFormattingOptions} />}
+                </div>
+              )}
+            </div>
+            <div className="dashboard-table-scroll">
+              <table className="dashboard-table">
+                <thead><TableHeader filters={filters} setFilters={handleFilterChange} visibleColumns={visibleColumns} formattingOptions={formattingOptions} /></thead>
+                <tbody>
+                  {data.routes?.map((route, index) => (
+                    <tr key={(filters.group_by || []).map((column) => route[column] ?? '').join('-') + '-' + index}>
+                      {filters.group_by?.includes('carrier') && <td>{airlineLabel(route.carrier)}</td>}
+                      {filters.group_by?.includes('aircraft_type') && <td>{aircraftLabel(route)}</td>}
+                      {filters.group_by?.includes('origin') && <td>{route.origin}</td>}
+                      {filters.group_by?.includes('dest') && <td>{route.dest}</td>}
+                      {filters.group_by?.includes('origin_country') && <td>{route.origin_country}</td>}
+                      {filters.group_by?.includes('dest_country') && <td>{route.dest_country}</td>}
+                      {filters.group_by?.includes('month') && <td>{route.month?.substring(0, 7)}</td>}
+                      {filters.group_by?.includes('quarter') && <td>{route.quarter?.substring(0, 4)} {quarterMap[route.quarter?.substring(5, 7)]}</td>}
+                      {filters.group_by?.includes('year') && <td>{route.year?.substring(0, 4)}</td>}
+                      {visibleColumns.departures_performed && <td>{formatMetric(route.departures_performed)}</td>}
+                      {visibleColumns.seats && <td>{formatMetric(route.seats)} {formattingOptions.showPerFlightAverage && route.seats_per_flight != null && '(' + formatMetric(route.seats_per_flight) + ')'}</td>}
+                      {visibleColumns.asms && <td className="hidden md:table-cell">{formatMetric(route.asms)}</td>}
+                      {visibleColumns.passengers && <td>{formatMetric(route.passengers)} {formattingOptions.showPerFlightAverage && route.passengers_per_flight != null && '(' + formatMetric(route.passengers_per_flight) + ')'}</td>}
+                      {visibleColumns.rpms && <td className="hidden md:table-cell">{formatMetric(route.rpms)}</td>}
+                      {visibleColumns.load_factor && <td>{formatLoadFactor(route.load_factor)}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {isLoading && <div className="dashboard-empty" role="status">Loading routes…</div>}
+            {!isLoading && fetchError && <div className="dashboard-empty" role="alert">{fetchError}</div>}
+            {!isLoading && !fetchError && data.routes?.length === 0 && <div className="dashboard-empty">No routes match these filters.</div>}
+            <div className="dashboard-results-count">{resultCount.toLocaleString()} total results</div>
+          </div>
+
+          <div className="dashboard-pagination">
+            <label>Rows per page
+              <select value={filters.items_per_page || 20} onChange={(event) => handleFilterChange({ ...filters, page: 1, items_per_page: event.target.value })}>
+                <option value="20">20</option><option value="40">40</option><option value="60">60</option><option value="80">80</option>
+              </select>
+            </label>
+            <span>Page {currentPage} of {totalPages}</span>
+            <div className="dashboard-pagination-actions">
+              <PagingButton disabled={currentPage <= 1 || isLoading} onClick={() => handleFilterChange({ ...filters, page: currentPage - 1 })}>Previous</PagingButton>
+              <PagingButton disabled={currentPage >= totalPages || isLoading} onClick={() => handleFilterChange({ ...filters, page: currentPage + 1 })}>Next</PagingButton>
+            </div>
+          </div>
+        </section>
+
+        <footer className="dashboard-footer">
+          <span>{dateRange.from_date && dateRange.to_date ? 'Data available: ' + dayjs(dateRange.from_date).format('MMM YYYY') + '–' + dayjs(dateRange.to_date).format('MMM YYYY') : 'T-100 airline traffic data'}</span>
+          <span>Questions or feedback? <a href="mailto:info@airlinestats.io">info@airlinestats.io</a></span>
+        </footer>
+      </main>
+    </div>
+  );
+}
