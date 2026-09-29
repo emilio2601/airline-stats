@@ -17,7 +17,7 @@ ENV BUNDLE_DEPLOYMENT="1" \
 RUN gem update --system --no-document && \
     gem install -N bundler
 
-# Node.js setup for building the Next.js app
+# Node.js setup for building the frontend
 FROM base AS node-setup
 ARG NODE_VERSION=22
 RUN apt-get update && \
@@ -26,7 +26,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y nodejs && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Throw-away build stage for Rails and Next.js
+# Throw-away build stage for Rails and the frontend
 FROM node-setup AS build
 
 # Install packages needed to build gems
@@ -51,9 +51,9 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Build the Vite app
 WORKDIR /rails/frontend
 COPY ./frontend/package.json ./frontend/package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci --include=dev
 COPY ./frontend ./
-RUN npm run build
+RUN npm run build && rm -rf node_modules
 
 # Move the compiled Vite files to the Rails public directory
 RUN cp -r /rails/frontend/dist/* /rails/public/
