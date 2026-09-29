@@ -48,7 +48,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
 
   return (
     <>
-      <span className="font-bold text-base">Filter by Country</span>
+      <span className="font-bold text-base">Countries</span>
       <div className="flex flex-row space-x-2">
         <input type="text" placeholder="Origin" value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className="border p-2 w-24"/>
         <button className="cursor-pointer" onClick={flipOriginDest}>
@@ -58,7 +58,7 @@ const CountryFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filt
       </div>
       <div className="flex flex-row space-x-2">
         <input type="checkbox" id="isBidirectionalCountry" name="isBidirectionalCountry" checked={isBidirectional} onChange={(e) => setIsBidirectional(!isBidirectional)}/>
-        <label htmlFor="isBidirectionalCountry">Include both directions?</label>
+        <label htmlFor="isBidirectionalCountry">Match countries in both directions</label>
       </div>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>

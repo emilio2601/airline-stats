@@ -49,7 +49,6 @@ const GroupingTab = ({ setFilters, filters }) => {
           </div>
         </div>
       ))}
-      <p className="dashboard-panel-hint">The table updates as you select groups.</p>
     </div>
   );
 };

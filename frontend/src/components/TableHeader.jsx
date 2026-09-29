@@ -2,23 +2,23 @@ import React from 'react';
 
 const groupingHeaders = [
   {key: "carrier", value: "Airline"},
-  {key: "aircraft_type", value: "Aircraft Type"},
+  {key: "aircraft_type", value: "Aircraft type"},
   {key: "origin", value: "Origin"},
   {key: "dest", value: "Destination"},
-  {key: "origin_country", value: "Origin Country"},
-  {key: "dest_country", value: "Destination Country"},
+  {key: "origin_country", value: "Origin country"},
+  {key: "dest_country", value: "Destination country"},
   {key: "month", value: "Month"},
   {key: "quarter", value: "Quarter"},
   {key: "year", value: "Year"},
 ]
 
 const columnHeaders = [
-  {key: "departures_performed", value: "Departures performed"},
-  {key: "seats", value: "Seats (per flight)"},
+  {key: "departures_performed", value: "Departures"},
+  {key: "seats", value: "Seats (avg/flight)"},
   {key: "asms", value: "ASMs", className: "hidden md:table-cell"},
-  {key: "passengers", value: "Passengers (per flight)"},
+  {key: "passengers", value: "Passengers (avg/flight)"},
   {key: "rpms", value: "RPMs", className: "hidden md:table-cell"},
-  {key: "load_factor", value: "Load Factor"},
+  {key: "load_factor", value: "Load factor"},
 ]
 
 const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }) => {
@@ -44,7 +44,7 @@ const TableHeader = ( { filters, setFilters, visibleColumns, formattingOptions }
       {columnHeaders.filter(col => visibleColumns[col.key]).map((col, i) => {
         let { value } = col;
         if (!formattingOptions.showPerFlightAverage) {
-          value = value.replace(" (per flight)", "");
+          value = value.replace(" (avg/flight)", "");
         }
         return (
           <th key={i} scope="col" className={col.className} aria-sort={col.key === filters.order_by ? (filters.order_dir === 'asc' ? 'ascending' : 'descending') : 'none'}>

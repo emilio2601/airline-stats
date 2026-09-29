@@ -185,7 +185,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
 
       <main className="dashboard-main">
         <div className="dashboard-page-heading">
-          <div><h1>Route explorer</h1><p>Explore monthly traffic by airline, airport, and route.</p></div>
+          <div><h1>Route explorer</h1><p>Compare routes, airlines, and traffic over time.</p></div>
           <div className="dashboard-page-actions">
             <Actions filters={filters} />
             <button type="button" className="dashboard-button dashboard-button-primary" onClick={handleExport} disabled={visibleColumnCount === 0}>
@@ -195,7 +195,7 @@ export default function HomePage({ initialFilters, savedSearch }) {
         </div>
 
         {isSavedSearchView && savedSearch && (
-          <div className="dashboard-saved-banner">Viewing saved search{savedSearch.search_name ? ': ' + savedSearch.search_name : ''}. Change a filter to create a new view.</div>
+          <div className="dashboard-saved-banner">Saved search{savedSearch.search_name ? ': ' + savedSearch.search_name : ''}. Changes won't affect the saved version.</div>
         )}
 
         <section className="dashboard-filter-panel" aria-label="Route filters">
@@ -228,7 +228,6 @@ export default function HomePage({ initialFilters, savedSearch }) {
                   <div className="dashboard-view-panel-heading">
                     <div>
                       <h3>{viewPanel === 'grouping' ? 'Group rows by' : viewPanel === 'columns' ? 'Visible columns' : 'Display settings'}</h3>
-                      <p>{viewPanel === 'grouping' ? 'Choose the dimensions for each row.' : viewPanel === 'columns' ? 'Show the metrics you need.' : 'Adjust how values and labels appear.'}</p>
                     </div>
                     <button type="button" className="dashboard-panel-close" onClick={() => setViewPanel(null)} aria-label="Close view settings">×</button>
                   </div>
@@ -267,7 +266,6 @@ export default function HomePage({ initialFilters, savedSearch }) {
             {isLoading && <div className="dashboard-empty" role="status">Loading routes…</div>}
             {!isLoading && fetchError && <div className="dashboard-empty" role="alert">{fetchError}</div>}
             {!isLoading && !fetchError && data.routes?.length === 0 && <div className="dashboard-empty">No routes match these filters.</div>}
-            <div className="dashboard-results-count">{resultCount.toLocaleString()} total results</div>
           </div>
 
           <div className="dashboard-pagination">

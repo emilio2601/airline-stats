@@ -15,7 +15,7 @@ function SavedSearchPage() {
         const response = await axios.get(`/api/saved_searches/${shareableId}`);
         setSavedSearch(response.data);
       } catch (err) {
-        setError('Failed to load saved search.');
+        setError('Couldn’t load this saved search.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -26,15 +26,15 @@ function SavedSearchPage() {
   }, [shareableId]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading saved search…</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>{error}</div>;
   }
 
   // Render the HomePage component with the saved search data
   return <HomePage initialFilters={savedSearch?.params} savedSearch={savedSearch} />;
 }
 
-export default SavedSearchPage; 
+export default SavedSearchPage;

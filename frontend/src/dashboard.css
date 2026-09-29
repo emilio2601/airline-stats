@@ -58,7 +58,6 @@
 .dashboard-check { display: inline-flex; align-items: center; gap: 7px; color: #657288; font-size: 12px; cursor: pointer; }
 .dashboard-check input { accent-color: var(--dashboard-accent); }
 .dashboard-check.is-active { color: #4e45bd; font-weight: 600; }
-.airport-picker-hint { color: #9aa5b5; font-size: 11px; }
 .dashboard-secondary-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 13px; margin-top: 17px; padding-top: 16px; border-top: 1px solid #edf0f5; }
 .dashboard-secondary-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .dashboard-app .dashboard-filter-trigger { min-height: 34px; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #d7dfea; border-radius: 7px; background: white; color: #536176; font-size: 12px; font-weight: 600; cursor: pointer; }
@@ -91,7 +90,6 @@
 .dashboard-view-panel-formatting { width: min(480px, calc(100% - 24px)); }
 .dashboard-view-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .dashboard-view-panel-heading h3 { margin: 0 0 3px; font-size: 13px; font-weight: 700; }
-.dashboard-view-panel-heading p { margin: 0; color: #8a97a9; font-size: 11px; }
 .dashboard-app .dashboard-panel-close { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 5px; background: transparent; color: #8794a6; font-size: 20px; line-height: 1; cursor: pointer; }
 .dashboard-app .dashboard-panel-close:hover { background: #f2f3f8; color: #48566b; }
 .dashboard-option-section + .dashboard-option-section { margin-top: 17px; }
@@ -121,7 +119,6 @@
 .dashboard-table th:not(:first-child), .dashboard-table td:not(:first-child) { text-align: right; }
 .dashboard-table tbody tr:hover { background: #fcfcff; }
 .dashboard-empty { padding: 30px; color: var(--dashboard-muted); text-align: center; font-size: 13px; }
-.dashboard-results-count { padding: 11px 15px; border-top: 1px solid var(--dashboard-line); color: #8b97a8; font-size: 11px; }
 .dashboard-pagination { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 14px; color: #748198; font-size: 12px; }
 .dashboard-pagination label { display: inline-flex; align-items: center; gap: 9px; }
 .dashboard-pagination select { min-height: 34px; padding: 6px 9px; border: 1px solid #d7dfea; border-radius: 7px; background: white; color: #4b5a70; }

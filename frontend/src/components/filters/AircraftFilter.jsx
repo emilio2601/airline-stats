@@ -12,7 +12,7 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig, fil
   }
 
   useEffect(() => {
-    setConfig({name: "Aircraft Type", keys: ["aircraft_type"]});
+    setConfig({name: "Aircraft type", keys: ["aircraft_type"]});
     if (filters.aircraft_type) {
       const aircraft = aircraftCodes.find(ac => ac.code === String(filters.aircraft_type));
       const matchingIcao = aircraft?.icao.find(code => code === aircraftIcao.toUpperCase()) || aircraft?.icao[0];
@@ -24,7 +24,7 @@ const AircraftFilter = ({ closePopover, setBreakdown, setFilters, setConfig, fil
 
   return (
     <>
-      <span className="font-bold text-base">Filter by Aircraft</span>
+      <span className="font-bold text-base">Aircraft type</span>
       <input type="text" placeholder="ICAO code" value={aircraftIcao} onChange={(e) => setAircraftIcao(e.target.value)} className="border p-2"/>
       <button className='bg-green-500 p-2 text-white rounded-md' onClick={applyFilter}>Apply</button>
     </>

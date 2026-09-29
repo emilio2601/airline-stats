@@ -43,7 +43,7 @@ const AirportFilter = ({ filters, setFilters }) => {
     const parsed = readInput(value);
     if (!parsed) {
       setInputs((current) => ({ ...current, [side]: value.toUpperCase() }));
-      setErrors((current) => ({ ...current, [side]: 'Use three-letter codes, separated by commas or spaces.' }));
+      setErrors((current) => ({ ...current, [side]: 'Enter 3-letter airport codes, separated by commas or spaces.' }));
       return;
     }
 
@@ -74,7 +74,7 @@ const AirportFilter = ({ filters, setFilters }) => {
           spellCheck="false"
           aria-invalid={Boolean(errors[side])}
           aria-describedby={errors[side] ? `${side}-airport-error` : undefined}
-          placeholder={codes.length ? 'Add another 3-letter code' : 'Any airport · type a 3-letter code'}
+          placeholder={codes.length ? 'Add airport code' : 'Any airport'}
           value={inputs[side]}
           onChange={(event) => handleInput(side, event.target.value)}
           onKeyDown={(event) => {
@@ -83,11 +83,11 @@ const AirportFilter = ({ filters, setFilters }) => {
             }
             if (event.key === 'Enter') {
               event.preventDefault();
-              if (inputs[side]) setErrors((current) => ({ ...current, [side]: 'Finish the three-letter code.' }));
+              if (inputs[side]) setErrors((current) => ({ ...current, [side]: 'Enter a 3-letter airport code.' }));
             }
           }}
           onBlur={() => {
-            if (inputs[side] && !errors[side]) setErrors((current) => ({ ...current, [side]: 'Finish the three-letter code.' }));
+            if (inputs[side] && !errors[side]) setErrors((current) => ({ ...current, [side]: 'Enter a 3-letter airport code.' }));
           }}
         />
       </div>
@@ -98,8 +98,8 @@ const AirportFilter = ({ filters, setFilters }) => {
   return (
     <div className="airport-picker">
       <div className="airport-picker-heading">
-        <h2>Build a route set</h2>
-        <p>Type 3-letter airport codes, such as LAX or GDL. Each code adds a chip and updates results automatically; airport names are not supported.</p>
+        <h2>Choose airports</h2>
+        <p>Enter 3-letter codes, such as LAX or GDL.</p>
       </div>
       <div className="airport-picker-grid">
         {renderSide('origin', origins)}
@@ -109,9 +109,8 @@ const AirportFilter = ({ filters, setFilters }) => {
       <div className="airport-picker-footer">
         <label className={`dashboard-check${filters.bidirectional_airport ? ' is-active' : ''}`}>
           <input type="checkbox" checked={Boolean(filters.bidirectional_airport)} onChange={(event) => setFilters((current) => ({ ...current, bidirectional_airport: event.target.checked, page: 1 }))} />
-          Include both airport directions
+          Search both directions
         </label>
-        <span className="airport-picker-hint">Changes update results automatically</span>
       </div>
     </div>
   );

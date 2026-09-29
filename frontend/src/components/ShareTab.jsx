@@ -60,7 +60,7 @@ const ShareTab = ({ filters }) => {
   return (
     <>
       <div className="flex flex-col text-sm text-gray-900 min-w-64 pr-2 pb-2">
-        <h3 className="font-bold text-base mb-2">Your Saved Searches</h3>
+        <h3 className="font-bold text-base mb-2">Saved searches</h3>
         <div className="space-y-2">
           {searches.length > 0 ? (
             searches.map((search) => (
@@ -70,7 +70,7 @@ const ShareTab = ({ filters }) => {
                 className="block p-2 rounded-md hover:bg-gray-100 group"
               >
                 <div className="flex justify-between items-center">
-                  <span>{search.search_name || "Untitled Search"}</span>
+                  <span>{search.search_name || "Untitled search"}</span>
                   <button
                     onClick={(e) => handleDelete(search.id, e)}
                     className="text-red-500 opacity-0 group-hover:opacity-100"
@@ -81,7 +81,7 @@ const ShareTab = ({ filters }) => {
               </a>
             ))
           ) : (
-            <p className="text-gray-500">You have no saved searches.</p>
+            <p className="text-gray-500">No saved searches yet.</p>
           )}
         </div>
         <div className="mt-4 pt-2">
@@ -89,7 +89,7 @@ const ShareTab = ({ filters }) => {
             onClick={() => setShowSaveModal(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
           >
-            Save Current Search
+            Save current search
           </button>
         </div>
       </div>
@@ -97,11 +97,11 @@ const ShareTab = ({ filters }) => {
       {showSaveModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl text-gray-900 w-[min(28rem,calc(100vw-2rem))]">
-            <h2 className="text-xl font-bold mb-4">{shareableLink ? "Search Saved!" : "Save Your Search"}</h2>
+            <h2 className="text-xl font-bold mb-4">{shareableLink ? "Search saved" : "Save search"}</h2>
             
             {shareableLink ? (
               <div>
-                <p className="mb-2">Your shareable link is ready:</p>
+                <p className="mb-2">Share this link:</p>
                 <input
                   type="text"
                   readOnly
@@ -127,7 +127,7 @@ const ShareTab = ({ filters }) => {
             ) : (
               <div>
                 <label htmlFor="searchName" className="block mb-2">
-                  Give your search a name (optional):
+                  Name (optional)
                 </label>
                 <input
                   id="searchName"
@@ -135,7 +135,7 @@ const ShareTab = ({ filters }) => {
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
                   className="w-full p-2 border rounded mb-4"
-                  placeholder="e.g., US to UK Flights"
+                  placeholder="e.g. US to UK flights"
                 />
                 <div className="flex justify-end space-x-2">
                   <button

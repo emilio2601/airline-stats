@@ -26,7 +26,7 @@ const ColumnsTab = ({ visibleColumns, setVisibleColumns }) => {
           </label>
         ))}
       </div>
-      <p className="dashboard-panel-hint">Choose which metrics appear in the table and CSV export. Keep at least one visible.</p>
+      <p className="dashboard-panel-hint">Columns shown here also appear in the CSV export.</p>
     </div>
   );
 };

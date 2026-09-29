@@ -51,7 +51,7 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters
     : dropdownChoice === 'between' ? Boolean(normalizedFirstMonth && normalizedSecondMonth && normalizedFirstMonth <= normalizedSecondMonth)
       : dropdownChoice === 'before' ? Boolean(normalizedSecondMonth) : Boolean(normalizedFirstMonth)
   const validationMessage = dropdownChoice === 'last_x' ? 'Enter a number from 1 to 100.'
-    : dropdownChoice === 'between' && normalizedFirstMonth && normalizedSecondMonth ? 'Start month must be before end month.'
+    : dropdownChoice === 'between' && normalizedFirstMonth && normalizedSecondMonth ? 'Start month can’t be after end month.'
       : 'Choose a valid month.'
 
   // Feature-detect native month input; keeps UI simple while ensuring graceful fallback
@@ -112,13 +112,13 @@ const DateFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters
 
   return (
     <>
-      <span className="font-bold text-base">Filter by Date</span>
+      <span className="font-bold text-base">Date</span>
       <select value={dropdownChoice} onChange={(e) => setDropdownChoice(e.target.value)} className="border p-2">
-        <option value="between">is between</option>
-        <option value="last_x">is in the last</option>
-        <option value="equal">is equal to</option>
-        <option value="after">is on or after</option>
-        <option value="before">is before or on</option>
+        <option value="between">Between</option>
+        <option value="last_x">Last</option>
+        <option value="equal">In</option>
+        <option value="after">From</option>
+        <option value="before">Through</option>
       </select>
       <div className="flex flex-row items-stretch justify-between w-[20rem] max-w-full space-x-2">
         {dropdownChoice == "last_x" && <>

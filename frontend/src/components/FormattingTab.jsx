@@ -3,7 +3,7 @@ import { formatNumber } from '../utils/numberFormat';
 const FormattingTab = ({ formattingOptions, setFormattingOptions }) => {
   const update = (key, value) => setFormattingOptions((current) => ({ ...current, [key]: value }));
   const significantDigits = formattingOptions.significantDigits ?? 3;
-  const exampleOptions = { rounding: 'auto', significantDigits };
+  const exampleOptions = { rounding: formattingOptions.rounding, significantDigits };
 
   return (
     <div className="dashboard-formatting-options">
@@ -73,7 +73,7 @@ const FormattingTab = ({ formattingOptions, setFormattingOptions }) => {
           />
         </label>
       </div>
-      <p className="dashboard-panel-hint">At {significantDigits} digits: 2,886,265 → {formatNumber(2_886_265, exampleOptions)}; 900,068 → {formatNumber(900_068, exampleOptions)}. Preferences are saved in this browser.</p>
+      {formattingOptions.rounding && formattingOptions.rounding !== 'none' && <p className="dashboard-panel-hint">For example: 2,886,265 → {formatNumber(2_886_265, exampleOptions)} · 900,068 → {formatNumber(900_068, exampleOptions)}</p>}
     </div>
   );
 };

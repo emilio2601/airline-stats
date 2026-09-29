@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 export const serviceClassMap = {
-  'F': 'Scheduled Passenger',
-  'G': 'Scheduled Cargo',
-  'L': 'Charter Passenger',
-  'P': 'Charter Cargo',
+  'F': 'Scheduled passenger',
+  'G': 'Scheduled cargo',
+  'L': 'Charter passenger',
+  'P': 'Charter cargo',
 }
 
 const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filters }) => {
@@ -21,7 +21,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   }
 
   useEffect(() => {
-    setConfig({name: "Service Class", keys: ["service_class"]});
+    setConfig({name: "Service class", keys: ["service_class"]});
     if (filters.service_class) {
       setBreakdown(serviceClassMap[filters.service_class] || filters.service_class)
     } else {
@@ -31,7 +31,7 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
 
   return (
     <div className="w-56 space-y-4">
-      <span className="font-bold text-base">Filter by Service Class</span>
+      <span className="font-bold text-base">Service class</span>
       <select value={serviceClass} onChange={handleChange} className="border p-2 w-full">
         {Object.keys(serviceClassMap).map((key) => (
           <option key={key} value={key}>{serviceClassMap[key]}</option>
@@ -42,4 +42,4 @@ const ClassFilter = ({ closePopover, setBreakdown, setFilters, setConfig, filter
   ) 
 }
 
-export default ClassFilter; 
+export default ClassFilter;
