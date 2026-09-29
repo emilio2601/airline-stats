@@ -36,8 +36,9 @@ class SavedSearchesController < ApplicationController
   def saved_search_params
     params.require(:saved_search).permit(:search_name, params: [
       :page, :items_per_page, :order_by, :order_dir, :origin_country, :dest_country,
-      :from_date, :to_date, :carrier, :aircraft_type, :origin, :dest, :bidirectional,
-      :service_class, group_by: []
+      :from_date, :to_date, :carrier, :aircraft_type, :origin, :dest,
+      :bidirectional_airport, :bidirectional_country, :service_class,
+      { group_by: [] }, { origin: [] }, { dest: [] }, { carrier: [] }
     ])
   end
-end 
+end

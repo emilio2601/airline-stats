@@ -47,26 +47,31 @@ class RouteSearch
     scope = scope.where(month: params[:from_date]..) if params[:from_date].present?
     scope = scope.where(month: ..params[:to_date]) if params[:to_date].present?
 
+    # Accept both legacy single codes and repeated or comma-separated airport codes.
+    origins = airport_codes(params[:origin])
+    destinations = airport_codes(params[:dest])
+
     # --- Airport Filters (with bidirectional logic) ---
     if bidirectional_airport?
       base = scope
-      if params[:origin].present? && params[:dest].present?
-        scope = base.where(origin: params[:dest], dest: params[:origin])
-                    .or(base.where(origin: params[:origin], dest: params[:dest]))
-      elsif params[:origin].present?
-        scope = base.where(origin: params[:origin])
-                    .or(base.where(dest: params[:origin]))
-      elsif params[:dest].present?
-        scope = base.where(dest: params[:dest])
-                    .or(base.where(origin: params[:dest]))
+      if origins.any? && destinations.any?
+        scope = base.where(origin: origins, dest: destinations)
+                    .or(base.where(origin: destinations, dest: origins))
+      elsif origins.any?
+        scope = base.where(origin: origins)
+                    .or(base.where(dest: origins))
+      elsif destinations.any?
+        scope = base.where(dest: destinations)
+                    .or(base.where(origin: destinations))
       end
     else
-      scope = scope.where(origin: params[:origin]) if params[:origin].present?
-      scope = scope.where(dest: params[:dest]) if params[:dest].present?
+      scope = scope.where(origin: origins) if origins.any?
+      scope = scope.where(dest: destinations) if destinations.any?
     end
 
     # --- Country Filters (with bidirectional logic) ---
-    if bidirectional_country?
+    # Return flights reverse the country pair as well as the airport pair.
+    if bidirectional_country? || (bidirectional_airport? && (origins.any? || destinations.any?))
       base = scope
       if params[:origin_country].present? && params[:dest_country].present?
         scope = base.where(origin_country: params[:dest_country], dest_country: params[:origin_country])
@@ -173,6 +178,13 @@ class RouteSearch
     ActiveRecord::Type::Boolean.new.deserialize(params[:bidirectional_country])
   end
 
+  def airport_codes(value)
+    Array.wrap(value).flat_map { |part| part.to_s.split(",") }
+      .map { |code| code.strip.upcase }
+      .reject(&:blank?)
+      .uniq
+  end
+
   # --- Sanitization Methods ---
 
   def sanitized_group_by
@@ -187,4 +199,4 @@ class RouteSearch
   def sanitized_order_dir
     ORDER_DIRECTIONS.include?(params[:order_dir]&.downcase) ? params[:order_dir] : "desc"
   end
-end 
+end

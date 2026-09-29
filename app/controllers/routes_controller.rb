@@ -22,8 +22,8 @@ class RoutesController < ApplicationController
     parts = ['routes']
     
     # Use the more specific airport code if available, otherwise fall back to country
-    origin = params[:origin].presence || params[:origin_country].presence
-    dest = params[:dest].presence || params[:dest_country].presence
+    origin = airport_label(params[:origin]) || params[:origin_country].presence
+    dest = airport_label(params[:dest]) || params[:dest_country].presence
 
     if origin && dest
       parts << "#{origin}_to_#{dest}"
@@ -42,5 +42,13 @@ class RoutesController < ApplicationController
     parts << timestamp
     
     "#{parts.join('_')}.csv"
+  end
+
+  def airport_label(value)
+    codes = Array.wrap(value).flat_map { |part| part.to_s.split(",") }
+      .map { |code| code.strip.upcase.gsub(/[^A-Z0-9]/, "") }
+      .reject(&:blank?)
+      .uniq
+    codes.join("-").presence
   end
 end

@@ -19,10 +19,10 @@
 #
 one:
   search_name: MyString
-  params: 
-  shareable_id: MyString
+  params: '{}'
+  shareable_id: saved-search-one
 
 two:
   search_name: MyString
-  params: 
-  shareable_id: MyString
+  params: '{}'
+  shareable_id: saved-search-two
